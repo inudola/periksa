@@ -130,7 +130,6 @@ $detailTemplate = '{add},{view}';
                                                 $dataProvider1->query->where(['simulation_id' => $model->simulation_id])
                                                     ->andwhere(['bulan' => $model->bulan])
                                                     ->andwhere(['tahun' => $model->tahun])
-                                                    ->andwhere(['not', ['n_group' => null]])
                                                     ->andwhere(['keterangan' => 'ORIGINAL BUDGET']);
 
 

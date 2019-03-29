@@ -2,18 +2,13 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\helpers\Url;
 use yii\widgets\Pjax;
-
 /* @var $this yii\web\View */
 /* @var $searchModel reward\models\SettingSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Settings';
 $this->params['breadcrumbs'][] = $this->title;
-
-$detailTemplate = '{view}';
-
 ?>
 <div class="setting-index">
 
@@ -32,41 +27,22 @@ $detailTemplate = '{view}';
                     'class' => 'table-responsive',
                 ],
                 'dataProvider' => $dataProvider,
-                //'filterModel' => $searchModel,
+                'filterModel' => $searchModel,
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
+                    'setup_name',
+                    'value_max',
                     [
-                        'attribute' => 'mstNature.nature_code',
-                        'header' => 'Code'
+                        'attribute' => 'status',
+                        'value' => function ($model) {
+                            return $model->status == '1' ? 'Active' : 'Not Active';
+                        }
                     ],
-
-                    [
-                        'attribute' => 'mstNature.nature_name',
-                        'header' => 'Nature'
-                    ],
+                    'description',
 
 
-
-                    ['class' => 'yii\grid\ActionColumn',
-                        'buttons' => [
-
-                            'view' => function ($url, $model, $key) {
-                                $urlConfig = [];
-
-                                $urlConfig['groupId'] = $model->group_nature;
-
-                                $url = Url::toRoute(array_merge(['/setting/view-element'], $urlConfig));
-                                return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
-                                    $url, [
-                                        'title' => 'View',
-                                        'data-pjax' => '0',
-                                        'class' => 'btn btn-sm btn-primary',
-                                    ]);
-                            },
-                        ],
-                        'template' => $detailTemplate
-                    ],
+                    ['class' => 'yii\grid\ActionColumn'],
                 ],
             ]); ?>
             <?php Pjax::end(); ?>

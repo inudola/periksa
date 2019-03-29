@@ -45,12 +45,12 @@ return [
 //             ],
 //         ],
         
-         'formatter' => [
-            'dateFormat' => 'dd.MM.yyyy',
-            'decimalSeparator' => ',',
-            'thousandSeparator' => '.',
-            'currencyCode' => 'EUR',
-        ],
+        // 'formatter' => [
+            // 'dateFormat' => 'dd.MM.yyyy',
+            // 'decimalSeparator' => ',',
+            // 'thousandSeparator' => '.',
+            // 'currencyCode' => 'EUR',
+        // ],
     ],
     'params' => $params,
 ];

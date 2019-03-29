@@ -39,10 +39,10 @@ class SaldoNki extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['smt', 'tahun', 'score', 'nik'], 'required'],
+            [['smt', 'tahun', 'score', 'nik', 'bi'], 'required'],
             [['smt', 'tahun'], 'integer'],
             //[['score', 'total'], 'number'],
-            [['created_at', 'updated_at', 'total'], 'safe'],
+            [['created_at', 'updated_at'], 'safe'],
             [['nik', 'bi'], 'string', 'max' => 10],
         ];
     }
@@ -69,37 +69,16 @@ class SaldoNki extends \yii\db\ActiveRecord
         Yii::$app->db->createCommand()->truncateTable('saldo_nki')->execute();
     }
 
-    public function getLastSaldo()
-    {
-        $data = SaldoNki::find()->where(['nik' => $this->nik])
-        ->orderBy(['tahun' => SORT_DESC, 'smt' => SORT_DESC])->one();
-
-        return $data->total;
-    }
-
-    public function getBi()
-    {
-        $bi = Employee::find()->where(['nik' => $this->nik])->one();
-
-        return $bi->bi;
-    }
-
     public function beforeSave($insert)
     {
-        $lastSaldo = SaldoNki::getLastSaldo();
-        $bi = SaldoNki::getBi();
-
         $this->score = str_replace(",", ".", $this->score);
 
-        if ($this->isNewRecord) {
+        if ($this->isNewRecord)
             $this->created_at = date("Y-m-d H:i:s");
-            $this->bi = $bi;
-            $this->total = $lastSaldo + $this->score;
 
-        }
-        else {
+        else
             $this->updated_at = date("Y-m-d H:i:s");
-        }
+
         return parent::beforeSave($insert);
     }
 
@@ -129,7 +108,7 @@ class SaldoNki extends \yii\db\ActiveRecord
 
     }
 
-    public function setElement($simId, $bulan, $tahun, $element, $amount, $group)
+    public function setElement($simId, $bulan, $tahun, $element, $amount)
     {
 
         $simulation = new SimulationDetail();
@@ -138,7 +117,6 @@ class SaldoNki extends \yii\db\ActiveRecord
         $simulation->tahun = $tahun;
         $simulation->element = $element;
         $simulation->amount = $amount;
-        $simulation->n_group = $group;
         $simulation->save();
 
     }
@@ -149,48 +127,45 @@ class SaldoNki extends \yii\db\ActiveRecord
         //$nikYangDimaksud = ['T118001', '87039', '71206', '86068', '86065', '88003', '214046', '79205'];
 
         //get value from setting model
-        $indexTHR = Setting::getBaseSetting(Setting::INDEX_THR_1);
-        $indexTHR2 = Setting::getBaseSetting(Setting::INDEX_THR_2);
-        $indexTA = Setting::getBaseSetting(Setting::INDEX_TUNJANGAN_AKHIR_TAHUN);
-        $indexUangSakuAP = Setting::getBaseSetting(Setting::INDEX_UANG_SAKU_AKHIR_PROGRAM);
+        $indexTHR = floatval(Setting::getBaseSetting(Setting::INDEX_THR_1));
+        $indexTHR2 = floatval(Setting::getBaseSetting(Setting::INDEX_THR_2));
+        $indexTA = floatval(Setting::getBaseSetting(Setting::INDEX_TUNJANGAN_AKHIR_TAHUN));
+        $indexUangSakuAP = floatval(Setting::getBaseSetting(Setting::INDEX_UANG_SAKU_AKHIR_PROGRAM));
 
-        $indexTunjCuti = Setting::getBaseSetting(Setting::INDEX_TUNJANGAN_CUTI);
-        $tax = Setting::getBaseSetting(Setting::INDEX_TAX);
-        $indexCutiBesar = Setting::getBaseSetting(Setting::INDEX_CUTI_BESAR);
+        $indexTunjCuti = floatval(Setting::getBaseSetting(Setting::INDEX_TUNJANGAN_CUTI));
+        $tax = floatval(Setting::getBaseSetting(Setting::INDEX_TAX));
+        $indexCutiBesar = floatval(Setting::getBaseSetting(Setting::INDEX_CUTI_BESAR));
 
         //BPJS
-        $maxJP = Setting::getBaseSetting(Setting::INDEX_JP_MAX);
-        $maxJkes = Setting::getBaseSetting(Setting::INDEX_JKES_MAX);
-        $iuranKes = Setting::getBaseSetting(Setting::IURAN_KES);
-        $iuranJHT = Setting::getBaseSetting(Setting::IURAN_JHT);
-        $iuranJP = Setting::getBaseSetting(Setting::IURAN_JP);
-        $iuranJKK = Setting::getBaseSetting(Setting::IURAN_JKK);
-        $iuranJKM = Setting::getBaseSetting(Setting::IURAN_JKM);
+        $maxJP = floatval(Setting::getBaseSetting(Setting::INDEX_JP_MAX));
+        $maxJkes = floatval(Setting::getBaseSetting(Setting::INDEX_JKES_MAX));
+        $iuranKes = floatval(Setting::getBaseSetting(Setting::IURAN_KES));
+        $iuranJHT = floatval(Setting::getBaseSetting(Setting::IURAN_JHT));
+        $iuranJP = floatval(Setting::getBaseSetting(Setting::IURAN_JP));
+        $iuranJKK = floatval(Setting::getBaseSetting(Setting::IURAN_JKK));
+        $iuranJKM = floatval(Setting::getBaseSetting(Setting::IURAN_JKM));
 
         //value PMK Structure
-        $indexPMK5 = Setting::getBaseSetting(Setting::INDEX_PMK_5);
-        $indexPMK10 = Setting::getBaseSetting(Setting::INDEX_PMK_10);
-        $indexPMK15 = Setting::getBaseSetting(Setting::INDEX_PMK_15);
-        $indexPMK20 = Setting::getBaseSetting(Setting::INDEX_PMK_20);
-        $indexPMK25 = Setting::getBaseSetting(Setting::INDEX_PMK_25);
-        $indexPMK30 = Setting::getBaseSetting(Setting::INDEX_PMK_30);
+        $indexPMK5 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_5));
+        $indexPMK10 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_10));
+        $indexPMK15 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_15));
+        $indexPMK20 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_20));
+        $indexPMK25 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_25));
+        $indexPMK30 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_30));
 
         //IE
-        $indexIE1 = Setting::getBaseSetting(Setting::INDEX_IE_1);
-        $indexIE2 = Setting::getBaseSetting(Setting::INDEX_IE_2);
-        $indexIE3 = Setting::getBaseSetting(Setting::INDEX_IE_3);
-        $indexIE4 = Setting::getBaseSetting(Setting::INDEX_IE_4);
-        $indexIE5 = Setting::getBaseSetting(Setting::INDEX_IE_5);
-        $indexIE6 = Setting::getBaseSetting(Setting::INDEX_IE_6);
-        $indexIEContract = Setting::getBaseSetting(Setting::INDEX_IE_CONTRACT);
-        $indexIETelkom = Setting::getBaseSetting(Setting::INDEX_IE_TELKOM);
+        $indexIE1 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_1));
+        $indexIE2 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_2));
+        $indexIE3 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_3));
+        $indexIE4 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_4));
+        $indexIE5 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_5));
+        $indexIE6 = floatval(Setting::getBaseSetting(Setting::INDEX_IE_6));
+        $indexIEContract = floatval(Setting::getBaseSetting(Setting::INDEX_IE_CONTRACT));
+        $indexIETelkom = floatval(Setting::getBaseSetting(Setting::INDEX_IE_TELKOM));
 
         //INSENTIF SEMESTERAN
-        $indexISTelkom = Setting::getBaseSetting(Setting::INDEX_IS_TELKOM);
-        $indexISContractProf = Setting::getBaseSetting(Setting::INDEX_IS_CONTRACT_PROF);
-        $indexNkk = Setting::getBaseSetting(Setting::INDEX_NKK);
-        $indexNki = Setting::getBaseSetting(Setting::INDEX_NKI);
-        $indexNku = Setting::getBaseSetting(Setting::INDEX_NKU);
+        $indexISTelkom = floatval(Setting::getBaseSetting(Setting::INDEX_IS_TELKOM));
+        $indexISContractProf = floatval(Setting::getBaseSetting(Setting::INDEX_IS_CONTRACT_PROF));
 
 
         $getSimulation = Simulation::find()->where(['id' => $simId])->one();
@@ -219,6 +194,20 @@ class SaldoNki extends \yii\db\ActiveRecord
         $data = [];
 
         $dates = Helpers::getMonthIterator($getSimulation->start_date, $getSimulation->end_date);
+
+        //array tahun
+        $element = [];
+
+        $start = current(array_keys($data));
+        $end = end(array_keys($data));
+
+        $theFirstYear = intval(substr($start, 0, 4));
+        $theLastYear = intval(substr($end, 0, 4));
+
+        $theFirstMonth = 12;
+        $theFirstMonths = intval(substr($start, 4, 2));
+        $theMonths = substr($end, 4, 2);
+        $theLastMonth = intval(substr($end, 4, 2));
 
         // cache tabel gaji
         $gajiTable = MstGaji::find()->asArray()->all();
@@ -261,6 +250,17 @@ class SaldoNki extends \yii\db\ActiveRecord
              * @var $date \DateTime
              */
             foreach ($dates as $date) {
+                $currentSemester = ceil(intval($date->format('m')) / 6);  // bulan ini semester berapa?
+                $currentYear = intval($date->format('Y'));
+
+                $theInsentif = Insentif::find()->where([
+                    'nik'   =>  $theNik->nik,
+                    'tahun' => $date->format('Y'),
+                ])
+                    ->andWhere(['smt' => $currentSemester])
+                    ->andWhere(['tahun' => $currentYear])
+                    ->orderBy(['smt' => SORT_DESC])
+                    ->one();
 
                 $dateFmt = $date->format('Ym');
 
@@ -432,11 +432,12 @@ class SaldoNki extends \yii\db\ActiveRecord
                 if ($theEmployee->employee_category == 'CONTRACT') {
                     $data[$dateFmt]['TOTAL GAJI INDIVIDU'] = $gaji + $tbh;
                 } else {
-                    $data[$dateFmt]['TOTAL GAJI INDIVIDU'] = $gaji + $tbh + $rekomposisi + (empty($tunjab) ? 0 : $tunjab);
+                    $data[$dateFmt]['TOTAL GAJI INDIVIDU'] = $gaji + $tbh + $rekomposisi;
                 }
                 $data[$dateFmt]['GAJI DASAR'] += $gaji;
                 $data[$dateFmt]['TBH'] += $tbh;
                 $data[$dateFmt]['REKOMPOSISI'] += $rekomposisi;
+                $data[$dateFmt]['TUNJANGAN JABATAN'] += $tunjab;
 
 
                 if ($getSimulation->perc_inc_gadas > 0 || $getSimulation->perc_inc_tbh > 0 || $getSimulation->perc_inc_rekomposisi > 0) {
@@ -449,141 +450,43 @@ class SaldoNki extends \yii\db\ActiveRecord
                     $data[$dateFmt]['TOTAL KENAIKAN'] = $data[$dateFmt]['KENAIKAN GADAS'] + $data[$dateFmt]['KENAIKAN TBH'] + $data[$dateFmt]['KENAIKAN REKOMPOSISI'];
                 }
 
-                //=========================================1. BASE SALARIES==========================================
                 $data[$dateFmt]['TOTAL GAJI DASAR'] = $data[$dateFmt]['GAJI DASAR'] + $data[$dateFmt]['KENAIKAN GADAS'];
-
-
-                //=========================================2. PERFORMANCE INCENTIVES=================================
-                //a. Insentif Semesteran
-                $band = intval(substr($careerPath['path'][$dateFmt]['bi'], 0, 1));
-
-                $nkk = Setting::getConvertionNkk($indexNkk);
-                $nku = Setting::getConvertionNku($indexNku);
-                $nki = Setting::getConvertionNki($indexNki);
-
-                if ($theEmployee->employee_category != 'TRAINEE') {
-                    //konstanta * nkk * nku * nki * TOTAL
-                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'PROBATION') {
-                        if ($band == 1 || $band == 2 || $band == 3) {
-                            $data[$dateFmt]['INSENTIF SEMESTERAN'] = 2.830 * $nkk * $nku * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 4) {
-                            $data[$dateFmt]['INSENTIF SEMESTERAN'] = 3.530 * $nkk * $nku * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 5) {
-                            $data[$dateFmt]['INSENTIF SEMESTERAN'] = 4.950 * $nkk * $nku * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 6) {
-                            $data[$dateFmt]['INSENTIF SEMESTERAN'] = 7.800 * $nkk * $nku * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        }
-                    } //konstanta * nki * TOTAL
-                    else if ($theEmployee->employee_category == 'CONTRACT') {
-                        $data[$dateFmt]['INSENTIF SEMESTERAN'] = 4.000 * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                    } //konstanta(FREE INPUT) * TOTAL
-                    else if ($theEmployee->employee_category == 'CONTRACT PROF' && $theEmployee->employee_category == 'EXPATRIATE') {
-                        $data[$dateFmt]['INSENTIF SEMESTERAN'] = $indexISContractProf * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                    } //konstanta(FREE INPUT) * TOTAL
-                    else if ($theEmployee->employee_category == 'TELKOM') {
-                        $data[$dateFmt]['INSENTIF SEMESTERAN'] = $indexISTelkom * $nkk * $nku * $nki * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                    }
-                }
-
-
-                //b. Insentif Ekstra
-                if ($theEmployee->employee_category != 'TRAINEE' || $theEmployee->employee_category != 'CONTRACT PROF' || $theEmployee->employee_category != 'EXPATRIATE') {
-                    //konstanta * TOTAL
-                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'PROBATION') {
-                        if ($band == 1) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE1 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 2) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE2 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 3) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE3 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 4) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE4 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 5) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE5 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        } else if ($band == 6) {
-                            $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIE6 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                        }
-                    } //konstanta * TOTAL
-                    else if ($theEmployee->employee_category == 'CONTRACT') {
-                        $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIEContract * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                    } //konstanta(FREE INPUT) * TOTAL
-                    else if ($theEmployee->employee_category == 'TELKOM') {
-                        $data[$dateFmt]['INSENTIF EKSTRA'] = $indexIETelkom * $data[$dateFmt]['TOTAL GAJI INDIVIDU'] / 12;
-                    }
-                }
-
-
-                //=========================================4. FUNCTIONAL ALLOWANCES==================================
-                $data[$dateFmt]['TUNJANGAN JABATAN'] += $tunjab;
-
-
-                //=========================================5. LIVING COST ALLOWANCES=================================
                 $data[$dateFmt]['TOTAL TBH'] = $data[$dateFmt]['TBH'] + $data[$dateFmt]['KENAIKAN TBH'];
-
-
-                //=========================================8. OTHER ALLOWANCE========================================
-                $data[$dateFmt]['TOTAL'] = ($data[$dateFmt]['GAJI DASAR'] + $data[$dateFmt]['TBH'] + $data[$dateFmt]['REKOMPOSISI']) + (empty($data[$dateFmt]['TOTAL KENAIKAN']) ? 0 : $data[$dateFmt]['TOTAL KENAIKAN']);
-
-                //THR
-                if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
-                    $data[$dateFmt]['THR'] = $indexTHR2 * $data[$dateFmt]['TOTAL'] / 12;
-                } else if ($theEmployee->employee_category == 'CONTRACT') {
-                    $data[$dateFmt]['THR'] = $indexTHR * $data[$dateFmt]['TOTAL'] / 12;
-                } else if ($theEmployee->employee_category == 'TRAINEE') {
-                    $data[$dateFmt]['THR'] = $indexTHR * $data[$dateFmt]['TOTAL'] / 12;
-                } else {
-                    $data[$dateFmt]['THR'] = $indexTHR * $data[$dateFmt]['TOTAL'] / 12;
-                }
-                //CUTI TAHUNAN
-                if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
-                    $data[$dateFmt]['CUTI TAHUNAN'] = $indexTunjCuti * $data[$dateFmt]['TOTAL'] / 12;
-                } else if ($theEmployee->employee_category == 'CONTRACT') {
-                    $data[$dateFmt]['CUTI TAHUNAN'] = $indexTunjCuti * $data[$dateFmt]['TOTAL'] / 12;
-                }
-                //TUNJANGAN AKHIR TAHUN
-                if ($theEmployee->employee_category == 'CONTRACT') {
-                    $data[$dateFmt]['TUNJANGAN AKHIR TAHUN'] = $indexTA * $data[$dateFmt]['TOTAL'] / 12;
-                }
-                //UANG SAKU AKHIR PROGRAM
-                if ($theEmployee->employee_category == 'TRAINEE') {
-                    $data[$dateFmt]['UANG SAKU AKHIR PROGRAM'] = $indexUangSakuAP * $data[$dateFmt]['TOTAL'] / 12;
-                }
-
-                $data[$dateFmt]['OTHER ALLOWANCES'] = $data[$dateFmt]['THR'] + $data[$dateFmt]['CUTI TAHUNAN'] + $data[$dateFmt]['TUNJANGAN AKHIR TAHUN'] + $data[$dateFmt]['UANG SAKU AKHIR PROGRAM'];
-
-
-                //=========================================9. TUNJANGAN REKOMPOSISI=================================
                 $data[$dateFmt]['TOTAL REKOMPOSISI'] = $data[$dateFmt]['REKOMPOSISI'] + $data[$dateFmt]['KENAIKAN REKOMPOSISI'];
 
-                //=========================================6. EMPLOYEES INCOME TAX===================================
-                $data[$dateFmt]['EMPLOYEES INCOME TAX'] = ($data[$dateFmt]['TOTAL GAJI DASAR'] + //base salaries
-                        ($data[$dateFmt]['INSENTIF SEMESTERAN'] + $data[$dateFmt]['INSENTIF EKSTRA']) + //performance incentives
-                        $data[$dateFmt]['TUNJANGAN JABATAN'] + //functional allowances
-                        $data[$dateFmt]['TOTAL TBH'] + //living cost allowances
-                        $data[$dateFmt]['OTHER ALLOWANCES'] + //other allowances
-                        $data[$dateFmt]['TOTAL REKOMPOSISI']) / (1 - $tax) * $tax;
+                $data[$dateFmt]['TOTAL'] = ($data[$dateFmt]['GAJI DASAR'] + $data[$dateFmt]['TBH'] + $data[$dateFmt]['REKOMPOSISI']) + (empty($data[$dateFmt]['TOTAL KENAIKAN']) ? 0 : $data[$dateFmt]['TOTAL KENAIKAN']);
 
 
-                //=========================================7. EMPLOYEES BPJS=========================================
                 //element bpjs ketenagakerjaan
-                $konstantaTotal = $iuranJHT + $iuranJKM + $iuranJKK;
-
-                if ($theEmployee->employee_category == 'TRAINEE') {
-                    $bpjsKetenagakerjaan = $konstantaTotal * $data[$dateFmt]['TOTAL GAJI DASAR'];
-                } else {
-                    $bpjsKetenagakerjaan = $konstantaTotal * ($data[$dateFmt]['TOTAL GAJI INDIVIDU'] - (empty($tunjab) ? 0 : $tunjab));;
+                //JHT
+                if ($theEmployee->employee_category !== 'TRAINEE') {
+                    $totalJHT = $iuranJHT * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
                 }
 
+                //JKEM
+                if ($theEmployee->employee_category == 'TRAINEE') {
+                    $totalJKM = $iuranJKM * $data[$dateFmt]['TOTAL GAJI DASAR'];
+                } else {
+                    $totalJKM = $iuranJKM * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                }
 
-                //bpjs jaminan pensiun
+                //JKK
+                if ($theEmployee->employee_category == 'TRAINEE') {
+                    $totalJKK = $iuranJKK * $data[$dateFmt]['TOTAL GAJI DASAR'];
+                } else {
+                    $totalJKK = $iuranJKM * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                }
+
+                //JP
                 if ($theEmployee->employee_category !== 'TRAINEE') {
                     //validate max upah untuk Iuran JP
                     if ($data[$dateFmt]['TOTAL GAJI INDIVIDU'] >= $maxJP) {
                         $totalJP = $iuranJP * floatval($maxJP);
                     } else {
-                        $totalJP = $iuranJP * ($data[$dateFmt]['TOTAL GAJI INDIVIDU'] - (empty($tunjab) ? 0 : $tunjab));
+                        $totalJP = $iuranJP * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
                     }
                 }
+
 
                 //element bpjs kesehatan
                 if ($theEmployee->employee_category !== 'TRAINEE') {
@@ -596,16 +499,73 @@ class SaldoNki extends \yii\db\ActiveRecord
                 }
 
 
-                $data[$dateFmt]['BPJS KETENAGAKERJAAN'] = $bpjsKetenagakerjaan;
-                $data[$dateFmt]['BPJS KESEHATAN'] = $totalKes;
-                $data[$dateFmt]['BPJS PENSIUN'] = $totalJP;
+                $data[$dateFmt]['BPJS KETENEGAKERJAAN'] += ($totalJHT + $totalJP + $totalJKK + $totalJKM);
+                $data[$dateFmt]['BPJS KESEHATAN'] += $totalKes;
+
+                //$data[$dateFmt]['EMPLOYEE INCOME TAX'] = $tax * $data[$dateFmt]['TOTAL'];
+
+                //((GD+OVERTIME+PERF.INSENTIVE+TUNJAB+TBH+THR+CUTI TAHUNAN+TA+REKOMPOSISI+RELOCATION)/(1-$tax)) * $tax
+                $data[$dateFmt]['EMPLOYEE INCOME TAX'] = (($data[$dateFmt]['TOTAL'] + $data[$dateFmt]['TUNJANGAN JABATAN'])/(1-$tax)) * $tax ;
 
 
-                $data[$dateFmt]['TOTAL'] = ($data[$dateFmt]['GAJI DASAR'] + $data[$dateFmt]['TBH'] + $data[$dateFmt]['REKOMPOSISI']) + (empty($data[$dateFmt]['TOTAL KENAIKAN']) ? 0 : $data[$dateFmt]['TOTAL KENAIKAN']);
+                //Insentif Semesteran
+                $band = intval($theEmployee->band);
+//                if ($theInsentif) {
+//                    if ($theEmployee->employee_category != 'TRAINEE') {
+//                        //konstanta * nkk * nku * nki * TOTAL
+//                        if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'PROBATION') {
+//                            if ($band == (1 || 2 || 3)) {
+//                                $data[$dateFmt]['INSENTIF SEMESTERAN'] += 2.830 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                            } else if ($band == 4) {
+//                                $data[$dateFmt]['INSENTIF SEMESTERAN'] += 3.530 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                            } else if ($band == 5) {
+//                                $data[$dateFmt]['INSENTIF SEMESTERAN'] += 4.950 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                            } else if ($band == 6) {
+//                                $data[$dateFmt]['INSENTIF SEMESTERAN'] += 7.800 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                            }
+//                        } //konstanta * nki * TOTAL
+//                        else if ($theEmployee->employee_category == 'CONTRACT') {
+//                            $data[$dateFmt]['INSENTIF SEMESTERAN'] += 4.000 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                        } //konstanta(FREE INPUT) * TOTAL
+//                        else if ($theEmployee->employee_category == 'CONTRACT PROF' && $theEmployee->employee_category == 'EXPATRIATE') {
+//                            $data[$dateFmt]['INSENTIF SEMESTERAN'] += $indexISContractProf * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                        } //konstanta(FREE INPUT) * TOTAL
+//                        else if ($theEmployee->employee_category == 'TELKOM') {
+//                            $data[$dateFmt]['INSENTIF SEMESTERAN'] += $indexISTelkom * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+//                        }
+//                    }
+//                }
 
-                //PMK
+                //Insentif Ekstra
+                if ($theEmployee->employee_category != 'TRAINEE' || $theEmployee->employee_category != 'CONTRACT PROF' || $theEmployee->employee_category != 'EXPATRIATE' ) {
+                    //konstanta * TOTAL
+                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'PROBATION') {
+                        if ($band == 1) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE1 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        } else if ($band == 2) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE2 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        } else if ($band == 3) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE3 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        } else if ($band == 4) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE4 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        } else if ($band == 5) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE5 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        } else if ($band == 6) {
+                            $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIE6 * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                        }
+                    } //konstanta * TOTAL
+                    else if ($theEmployee->employee_category == 'CONTRACT') {
+                        $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIEContract * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                    }
+                    //konstanta(FREE INPUT) * TOTAL
+                    else if ($theEmployee->employee_category == 'TELKOM') {
+                        $data[$dateFmt]['INSENTIF EKSTRA'] += $indexIETelkom * $data[$dateFmt]['TOTAL GAJI INDIVIDU'];
+                    }
+                }
+
+
+                //PMK => KELIPATAN 5 TAHUN S/D 30 TAHUN
                 if ($theEmployee->employee_category == 'PERMANENT') {
-                    //PMK => KELIPATAN 5 TAHUN S/D 30 TAHUN
                     if ($masaKerja == 60) {
                         $data[$dateFmt]['PMK'] = $indexPMK5 * $data[$dateFmt]['TOTAL'];
                     } else if ($masaKerja == 120) {
@@ -619,7 +579,12 @@ class SaldoNki extends \yii\db\ActiveRecord
                     } else if ($masaKerja == 360) {
                         $data[$dateFmt]['PMK'] = $indexPMK30 * $data[$dateFmt]['TOTAL'];
                     }
-
+//                else {
+//                    echo "\n===========\n[$currentYear] \n";
+//                    echo "nik : " . $theEmployee->nik . " ngga punya PMK\n";
+//                    echo "masa kerja : " . $masaKerja . " bulan\n\n";
+//                    //$data[$dateFmt]['PMK'] = 0;
+//                }
                 }
 
                 //CUTI BESAR => 6 TAHUN = 72 BULAN
@@ -627,10 +592,146 @@ class SaldoNki extends \yii\db\ActiveRecord
                     if ($masaKerja == 72 || $masaKerja == 144 || $masaKerja == 216 || $masaKerja == 288 || $masaKerja == 360 || $masaKerja == 432) {
                         $data[$dateFmt]['CUTI BESAR'] = $indexCutiBesar * $data[$dateFmt]['TOTAL'];
                     }
+//                else {
+//                    echo "\n===========\n[$currentYear] \n";
+//                    echo "nik : " . $theEmployee->nik . " ngga punya CUTI BESAR\n";
+//                    echo "masa kerja : " . $masaKerja . " bulan\n\n";
+//                    //$data[$dateFmt]['CUTI BESAR'] = 0;
+//                }
                 }
 
             }
 
+            $start = current(array_keys($data));
+            $end = end(array_keys($data));
+
+            $theFirstYear = intval(substr($start, 0, 4));
+            $theLastYear = intval(substr($end, 0, 4));
+
+            $theFirstMonth = 12;
+            $theFirstMonths = intval(substr($start, 4, 2));
+            $theMonths = substr($end, 4, 2);
+            $theLastMonth = intval(substr($end, 4, 2));
+
+
+            for ($i = $theFirstYear; $i <= $theLastYear; $i++) {
+
+                if ($i < $theLastYear) {
+
+                    //echo "pakai". $theFirstMonth."\n";
+                    $element[$i . $theFirstMonth]['LAST TOTAL'] = $data[$i . $theFirstMonth]['GAJI DASAR'] + $data[$i . $theFirstMonth]['TBH'] + $data[$i . $theFirstMonth]['REKOMPOSISI'] + (empty($data[$i . $theFirstMonth]['TOTAL KENAIKAN']) ? 0 : $data[$i . $theFirstMonth]['TOTAL KENAIKAN']);
+
+                    //THR
+                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
+                        $element[$i . $theFirstMonth]['THR'] = ($indexTHR2 * $element[$i . $theFirstMonth]['LAST TOTAL']) / $theFirstMonth;
+                    }
+                    else if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theFirstMonth]['THR'] = ($indexTHR * ($element[$i . $theFirstMonth]['LAST TOTAL'] - $data[$i . $theFirstMonth]['REKOMPOSISI'])) / $theFirstMonth;
+                    }
+                    else if ($theEmployee->employee_category == 'TRAINEE') {
+                        $element[$i . $theFirstMonth]['THR'] = ($indexTHR * $data[$i . $theFirstMonth]['GAJI DASAR']) / $theFirstMonth;
+                    }
+                    else {
+                        $element[$i . $theFirstMonth]['THR'] = ($indexTHR * $element[$i . $theFirstMonth]['LAST TOTAL']) / $theFirstMonth;
+                    }
+
+                    //CUTI TAHUNAN
+                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
+                        $element[$i . $theFirstMonth]['CUTI TAHUNAN'] = ($indexTunjCuti * $element[$i . $theFirstMonth]['LAST TOTAL']) / $theFirstMonth;
+                    }
+                    else if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theFirstMonth]['CUTI TAHUNAN'] = ($indexTunjCuti * ($element[$i . $theFirstMonth]['LAST TOTAL'] - $data[$i . $theFirstMonth]['REKOMPOSISI'])) / $theFirstMonth;
+                    }
+
+                    //TUNJANGAN AKHIR TAHUN
+                    if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theFirstMonth]['TUNJANGAN AKHIR TAHUN'] = ($indexTA * ($element[$i . $theFirstMonth]['LAST TOTAL'] - $data[$i . $theFirstMonth]['REKOMPOSISI'])) / $theFirstMonth;
+                    }
+
+                    //UANG SAKU AKHIR PROGRAM
+                    if ($theEmployee->employee_category == 'TRAINEE') {
+                        $element[$i . $theFirstMonth]['UANG SAKU AKHIR PROGRAM'] = ($indexUangSakuAP * $data[$i . $theFirstMonth]['GAJI DASAR']) / $theFirstMonth;
+                    }
+
+                    //((GD+OVERTIME+PERF.INSENTIVE+TUNJAB+TBH+THR+CUTI TAHUNAN+TA+REKOMPOSISI+RELOCATION)/(1-$tax)) * $tax
+                    $element[$i . $theFirstMonth]['EMPLOYEE INCOME TAX'] = (($element[$i . $theFirstMonth]['THR'] + $element[$i . $theFirstMonth]['CUTI TAHUNAN'])/(1-$tax)) * $tax ;
+
+                }
+                else {
+
+                    //echo "pakai". $theLastMonth."\n";
+
+                    $element[$i . $theMonths]['LAST TOTAL'] = $data[$i . $theMonths]['GAJI DASAR'] + $data[$i . $theMonths]['TBH'] + $data[$i . $theMonths]['REKOMPOSISI'] + (empty($data[$i . $theMonths]['TOTAL KENAIKAN']) ? 0 : $data[$i . $theMonths]['TOTAL KENAIKAN']);
+
+
+                    //THR
+                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
+                        $element[$i . $theMonths]['THR'] = (($indexTHR2 * $element[$i . $theMonths]['LAST TOTAL']) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+                    else if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theMonths]['THR'] = (($indexTHR * ($element[$i . $theMonths]['LAST TOTAL'] - $data[$i . $theMonths]['REKOMPOSISI'])) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+                    else if ($theEmployee->employee_category == 'TRAINEE') {
+                        $element[$i . $theMonths]['THR'] = (($indexTHR * $data[$i . $theMonths]['GAJI DASAR']) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+                    else {
+                        $element[$i . $theMonths]['THR'] = (($indexTHR * $element[$i . $theMonths]['LAST TOTAL']) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+
+                    //CUTI TAHUNAN
+                    if ($theEmployee->employee_category == 'PERMANENT' || $theEmployee->employee_category == 'TELKOM') {
+                        $element[$i . $theMonths]['CUTI TAHUNAN'] = (($indexTunjCuti * $element[$i . $theMonths]['LAST TOTAL']) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+                    else if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theMonths]['CUTI TAHUNAN'] = (($indexTunjCuti * ($element[$i . $theMonths]['LAST TOTAL'] - $data[$i . $theMonths]['REKOMPOSISI'])) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+
+                    //TUNJANGAN AKHIR TAHUN
+                    if ($theEmployee->employee_category == 'CONTRACT') {
+                        $element[$i . $theMonths]['TUNJANGAN AKHIR TAHUN'] = (($indexTA * ($element[$i . $theMonths]['LAST TOTAL'] - $data[$i . $theMonths]['REKOMPOSISI'])) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+
+                    //UANG SAKU AKHIR PROGRAM
+                    if ($theEmployee->employee_category == 'TRAINEE') {
+                        $element[$i . $theMonths]['UANG SAKU AKHIR PROGRAM'] = (($indexUangSakuAP * $data[$i . $theMonths]['GAJI DASAR']) / $theLastMonth) / (12 / $theLastMonth);
+                    }
+
+
+                    //((GD+OVERTIME+PERF.INSENTIVE+TUNJAB+TBH+THR+CUTI TAHUNAN+TA+REKOMPOSISI+RELOCATION)/(1-$tax)) * $tax
+                    $element[$i . $theMonths]['EMPLOYEE INCOME TAX'] = (($element[$i . $theMonths]['THR'] + $element[$i . $theMonths]['CUTI TAHUNAN'])/(1-$tax)) * $tax ;
+
+                }
+
+            }
+
+        }
+
+        for ($i = $theFirstYear; $i <= $theLastYear; $i++) {
+            if ($i < $theLastYear) {
+                for ($y = $theFirstMonths; $y <= $theFirstMonth; $y++) {
+                    $this->setElement($simId, $y, $theFirstYear, 'EMPLOYEES INCOME TAX', $element[$i . $theFirstMonth]['EMPLOYEE INCOME TAX']);
+                    $this->setElement($simId, $y, $theFirstYear, 'OTHER ALLOWANCE', $element[$i . $theFirstMonth]['THR'] + $element[$i . $theFirstMonth]['CUTI TAHUNAN']);
+
+                    $this->setElement($simId, $y, $theFirstYear, 'TUNJANGAN AKHIR TAHUN', $element[$i . $theFirstMonth]['TUNJANGAN AKHIR TAHUN']);
+                    $this->setElement($simId, $y, $theFirstYear, 'UANG SAKU AKHIR PROGRAM', $element[$i . $theFirstMonth]['UANG SAKU AKHIR PROGRAM']);
+
+                    //$this->setElement($simId, $y, $theFirstYear, 'THR', $element[$i . $theFirstMonth]['THR']);
+                    //$this->setElement($simId, $y, $theFirstYear, 'CUTI TAHUNAN', $element[$i . $theFirstMonth]['CUTI TAHUNAN']);
+
+                }
+            } else {
+                for ($y = $theFirstMonths; $y <= $theLastMonth; $y++) {
+                    $this->setElement($simId, $y, $theLastYear, 'EMPLOYEES INCOME TAX', $element[$i . $theMonths]['EMPLOYEE INCOME TAX']);
+                    $this->setElement($simId, $y, $theLastYear, 'OTHER ALLOWANCE', $element[$i . $theMonths]['THR'] + $element[$i . $theMonths]['CUTI TAHUNAN']);
+
+                    $this->setElement($simId, $y, $theLastYear, 'TUNJANGAN AKHIR TAHUN', $element[$i . $theMonths]['TUNJANGAN AKHIR TAHUN']);
+                    $this->setElement($simId, $y, $theLastYear, 'UANG SAKU AKHIR PROGRAM', $element[$i . $theMonths]['UANG SAKU AKHIR PROGRAM']);
+
+                    //$this->setElement($simId, $y, $theLastYear, 'THR', $element[$i . $theMonths]['THR']);
+                    //$this->setElement($simId, $y, $theLastYear, 'CUTI TAHUNAN', $element[$i . $theMonths]['CUTI TAHUNAN']);
+
+                }
+            }
         }
 
 
@@ -661,28 +762,20 @@ class SaldoNki extends \yii\db\ActiveRecord
                 }
             }
 
-            $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $data[$i]['TOTAL GAJI DASAR'], 1);
+            $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $data[$x]['TOTAL GAJI DASAR']);
+            $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $data[$x]['TUNJANGAN JABATAN']);
+            $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $data[$x]['TOTAL TBH']);
+            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $data[$x]['EMPLOYEE INCOME TAX']);
+            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', $data[$x]['BPJS KESEHATAN'] + $data[$x]['BPJS KETENEGAKERJAAN'] + (empty($data[$x]['TOTAL KENAIKAN']) ? 0 : $data[$x]['TOTAL KENAIKAN']));
 
-            $this->setElement($simId, $theMonth, $theYear, 'INSENTIF SEMESTERAN', $data[$i]['INSENTIF SEMESTERAN'], 3);
-            $this->setElement($simId, $theMonth, $theYear, 'INSENTIF EKSTRA', $data[$i]['INSENTIF EKSTRA'], 3);
+            $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI', $data[$x]['TOTAL REKOMPOSISI']);
+            //$this->setElement($simId, $theMonth, $theYear, 'BPJS KESEHATAN', $data[$x]['BPJS KESEHATAN'] + (empty($data[$x]['TOTAL KENAIKAN']) ? 0 : $data[$x]['TOTAL KENAIKAN']));
+            //$this->setElement($simId, $theMonth, $theYear, 'BPJS KETENEGAKERJAAN', $data[$x]['BPJS KETENEGAKERJAAN'] + (empty($data[$x]['TOTAL KENAIKAN']) ? 0 : $data[$x]['TOTAL KENAIKAN']));
+            $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $data[$x]['PMK']);
+            $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $data[$x]['CUTI BESAR']);
 
-            $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $data[$i]['TUNJANGAN JABATAN'], 4);
-            $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $data[$i]['TOTAL TBH'], 5);
-            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $data[$i]['EMPLOYEE INCOME TAX'], 6);
-
-            $this->setElement($simId, $theMonth, $theYear, 'BPJS KETENAGAKERJAAN', $data[$i]['BPJS KETENAGAKERJAAN'], 7);
-            $this->setElement($simId, $theMonth, $theYear, 'BPJS KESEHATAN', $data[$i]['BPJS KESEHATAN'], 7);
-            $this->setElement($simId, $theMonth, $theYear, 'BPJS PENSIUN', $data[$i]['BPJS PENSIUN'], 7);
-
-            $this->setElement($simId, $theMonth, $theYear, 'THR', $data[$i]['THR'], 15);
-            $this->setElement($simId, $theMonth, $theYear, 'CUTI TAHUNAN', $data[$i]['CUTI TAHUNAN'], 15);
-            $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN AKHIR TAHUN', $data[$i]['TUNJANGAN AKHIR TAHUN'], 15);
-            $this->setElement($simId, $theMonth, $theYear, 'UANG SAKU AKHIR PROGRAM', $data[$i]['UANG SAKU AKHIR PROGRAM'], 15);
-
-            $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI', $data[$i]['TOTAL REKOMPOSISI'], 16);
-
-            $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $data[$i]['PMK'], null);
-            $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $data[$i]['CUTI BESAR'], null);
+            $this->setElement($simId, $theMonth, $theYear, 'INSENTIF EKSTRAR', $data[$i]['INSENTIF EKSTRA']);
+            $this->setElement($simId, $theMonth, $theYear, 'INSENTIF EKSTRAR', $data[$i]['INSENTIF EKSTRA']);
 
         }
 

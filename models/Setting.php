@@ -41,9 +41,8 @@ class Setting extends \yii\db\ActiveRecord
     const INDEX_CUTI_BESAR = 'CUTI BESAR';
     const INDEX_TAX = 'TAX';
 
-    //POIN NKI
-    const INDEX_ASUMSI_POINT_1 = 'ASUMSI POINT 1';
-    const INDEX_ASUMSI_POINT_2 = 'ASUMSI POINT 2';
+    //POIN
+    const INDEX_ASUMSI_POINT = 'ASUMSI POINT';
     const INDEX_TOTAL_POINT = 'TOTAL POINT';
 
     //pmk
@@ -65,11 +64,8 @@ class Setting extends \yii\db\ActiveRecord
     const INDEX_IE_TELKOM = 'IE TELKOM';
 
     //INSENTIF SEMESTERAN
-    const INDEX_IS_TELKOM = 'IS TELKOM';
-    const INDEX_IS_CONTRACT_PROF = 'IS CONTRACT PROF & EXPATRIATE';
-    const INDEX_NKU = 'NKU';
-    const INDEX_NKI = 'NKI';
-    const INDEX_NKK = 'NKK';
+    const INDEX_IS_TELKOM = 'INSENTIF SEMESTERAN TELKOM';
+    const INDEX_IS_CONTRACT_PROF = 'CONTRACT PROF & EXPATRIATE';
 
     public static function tableName()
     {
@@ -82,7 +78,7 @@ class Setting extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['value_max', 'setup_name', 'group_nature'], 'required'],
+            [['value_max', 'setup_name'], 'required'],
             [['status', 'description'], 'string'],
             [['created_at', 'updated_at', 'value_max'], 'safe'],
             [['value_max'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
@@ -100,7 +96,6 @@ class Setting extends \yii\db\ActiveRecord
             'setup_name' => 'Setup Name',
             'value_max' => 'Value',
             'status' => 'Status',
-            'group_nature' => 'Group Nature',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -117,11 +112,11 @@ class Setting extends \yii\db\ActiveRecord
             $this->value_max = str_replace(",", ".", $this->value_max);
             $this->setup_name = strtoupper($this->setup_name);
 
-            if ($this->isNewRecord) {
+            if ($this->isNewRecord)
                 $this->created_at = date("Y-m-d H:i:s");
-            } else {
+
             $this->updated_at = date("Y-m-d H:i:s");
-            }
+
             return true;
         } else {
             return false;
@@ -137,99 +132,6 @@ class Setting extends \yii\db\ActiveRecord
         $theSetting = $settingTable[$key];
         $value = $theSetting['value_max'];
 
-        return floatval($value);
-    }
-
-
-    public function getConvertionNkk($params) {
-
-        $value = $params;
-
-        //4 ≤ X ≤ 5 => 105% s/d ≤ 110%
-        if ($value == 5) {
-            $konversi = 1.10;
-        }
-        else if ($value >= 4 && $value < 5 ) {
-            $konversi = 1.05 ;
-        }
-        //3 ≤ X < 4 => 100% s/d <105%
-        else if ($value >= 3 && $value < 4 ) {
-            $konversi = 1.00;
-        }
-        //2.4 ≤ X <3 => 80% s/d <100%
-        else if ($value >= 2.4 && $value < 3) {
-            $konversi = 0.8;
-        }
-        //< 2.4 => 0%
-        else if ($value < 2.4) {
-            $konversi = 0.00;
-        }
-        else {
-            $konversi = "step exceeds the specified range";
-        }
-
-        return floatval($konversi);
-    }
-
-
-    public function getConvertionNku($params) {
-        $value = $params;
-
-        //4≤ X ≤ 5 => 105% s/d ≤ 110%
-        if ($value == 5) {
-            $konversi = 1.10;
-        }
-        else if ($value >= 4 && $value <= 5) {
-            $konversi = 1.05;
-        }
-        //3≤ X <4 => 100% s/d <105%
-        else if ($value >= 3 && $value < 4) {
-            $konversi = 1.00;
-        }
-        //1≤ X <3 => 80% s/d <100%
-        else if ($value >= 1 && $value < 3) {
-            $konversi = 0.8;
-        }
-        else {
-            $konversi = "step exceeds the specified range";
-        }
-
-        return floatval($konversi);
-    }
-
-    public function getConvertionNki($params) {
-        $value = $params;
-
-        //≥ 4.5 => 144%
-        if ($value >= 4.5) {
-            $konversi = 1.44;
-        }
-        //4≤ X <4.5 => 118% s/d <135%
-        else if ($value >= 4 && $value < 4.5) {
-            $konversi = 1.18;
-        }
-        //3≤ X <4 => 100% s/d <118%
-        else if ($value >= 3 && $value < 4) {
-            $konversi = 1.00;
-        }
-        //2≤ X <3 => 50% s/d <100%
-        else if ($value >= 2 && $value < 3) {
-            $konversi = 0.5;
-        }
-        //1≤ X <2 => 0%
-        else if ($value >= 1 && $value < 2) {
-            $konversi = 0;
-        }
-        else {
-            $konversi = "step exceeds the specified range";
-        }
-
-        return floatval($konversi);
-    }
-
-
-    public function getMstNature()
-    {
-        return $this->hasOne(MstNature::className(), ['id' => 'group_nature']);
+        return $value;
     }
 }

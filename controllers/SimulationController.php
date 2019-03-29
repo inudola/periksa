@@ -71,9 +71,7 @@ class SimulationController extends Controller
 
         $searchModel = new SimulationDetailSearch();
         $dataProvider = $searchModel->search11(Yii::$app->request->queryParams);
-        $dataProvider->sort = ['defaultOrder' => ['id' => SORT_ASC]];
-        $dataProvider->query->where(['NOT', ['n_group' => null]]);
-        $dataProvider->query->andwhere(['simulation_id' => $lastSimulation->id]);
+        $dataProvider->query->where(['simulation_id' => $lastSimulation->id]);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -96,6 +94,13 @@ class SimulationController extends Controller
         return $this->render('//simulation-detail/view', [
             'model' => $this->findModel($id),
         ]);
+//        $simulationDetail = SimulationDetail::find()->where(['simulation_id' => $id])->all();
+//
+//        return $this->render('view', [
+//            'model' => $this->findModel($id),
+//            'simulationDetail' => $simulationDetail
+//        ]);
+
 
     }
 
@@ -244,13 +249,13 @@ class SimulationController extends Controller
 
         /*====================get data simulation start=========================*/
         $dataProvider = $searchModel->search11(Yii::$app->request->queryParams);
-        $dataProvider->query->where(['simulation_id' => $id])->andWhere(['keterangan' => 'ORIGINAL BUDGET'])->andWhere(['NOT', ['n_group' => null]]);
+        $dataProvider->query->where(['simulation_id' => $id])->andWhere(['keterangan' => 'ORIGINAL BUDGET']);
         /*====================get data simulation end=========================*/
 
         /*====================get data alternatif start=========================*/
         $dataProviderAlt = $searchModel->search11(Yii::$app->request->queryParams);
         $dataProviderAlt->sort = ['defaultOrder' => ['bulan' => SORT_ASC, 'tahun' => SORT_ASC]];
-        $dataProviderAlt->query->where(['simulation_id' => $id])->andWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']])->andWhere(['NOT', ['n_group' => null]]);
+        $dataProviderAlt->query->where(['simulation_id' => $id])->andWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']]);
         /*====================get data alternatif end=========================*/
 
 
@@ -335,7 +340,6 @@ class SimulationController extends Controller
                 'SUM({{simulation_detail}}.amount) AS sumProj',
             ])
             ->where(['simulation_id' => $id])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->groupBy(['bulan', 'tahun'])
             ->all();
 
@@ -369,18 +373,16 @@ class SimulationController extends Controller
                     '{{simulation_detail}}.*', // select all fields
                     'SUM({{simulation_detail}}.amount) AS my_sum' // calculate orders count
                 ])
-                //->joinWith('mst_nature')
                 ->where(['simulation_id' => $id])
-                ->andWhere(['NOT', ['n_group' => null]])
                 ->andWhere(['bulan' => $simulation->bulan, 'tahun' => $simulation->tahun])
-                ->groupBy('n_group')
+                ->groupBy('element')
                 ->all();
 
             foreach ($elements as $element) {
 
                 // Element
                 $startRow++;
-                $sheet->setCellValue('C' . $startRow, $element->mstNature->nature_name);
+                $sheet->setCellValue('C' . $startRow, $element->element);
                 $sheet->setCellValue('D' . $startRow, floatval($element->my_sum));
             }
 
@@ -485,8 +487,29 @@ class SimulationController extends Controller
     {
         $model = new Simulation();
 
+        if (Yii::$app->request->isPost) {
 
-        return $this->render('test', [
+            $model->load(Yii::$app->request->post());
+
+            $xx = Yii::$app->request->post();
+            $elements = $xx['Simulation']['element'];
+
+            $elementTable = MstElement::find()->asArray()->all();
+            $key = array_search($elements, array_column($elementTable, 'id'));
+            $theElement = $elementTable[$key];
+
+            $element = $theElement['element_name'];
+
+            $cmd = Yii::getAlias('@webroot') . '/../../yii simul/element-test-simulation "' . $model->start_date . '" "' . $model->end_date . '" "' . $model->nik . '" "'. $element . '" "' . $model->perc_inc_gadas . '" "' . $model->perc_inc_tbh . '" "' . $model->perc_inc_rekomposisi . '"';
+            $output = shell_exec($cmd);
+
+            var_dump($output);
+            exit();
+            return $this->redirect(['index-test']);
+        }
+
+
+        return $this->render('element-test', [
             'model' => $model,
         ]);
     }

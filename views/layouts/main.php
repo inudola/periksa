@@ -94,7 +94,15 @@ if (Yii::$app->controller->action->id === 'login') {
         <?php $this->head() ?>
     </head>
 
+    <?php
+    if (!$isAdmin && !$isAdminProjection && !Yii::$app->user->isGuest) {
+    ?>
     <body class="hold-transition skin-red sidebar-collapse sidebar-mini">
+    <?php } else {
+    ?>
+    <body class="hold-transition skin-red sidebar-mini">
+    <?php } ?>
+
     <!-- BEGIN PRELOADER -->
     <div class="se-pre-con">
         <img alt="" class="img-loader">

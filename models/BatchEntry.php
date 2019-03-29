@@ -290,7 +290,7 @@ class BatchEntry extends \yii\db\ActiveRecord
     }
 
     public
-    function setElement($simId, $bulan, $tahun, $element, $amount, $group)
+    function setElement($simId, $bulan, $tahun, $element, $amount)
     {
 
         $keterangan = Yii::$app->session->get('keterangan');
@@ -302,7 +302,6 @@ class BatchEntry extends \yii\db\ActiveRecord
         $simulation->element = $element;
         $simulation->amount = $amount;
         $simulation->keterangan = $keterangan;
-        $simulation->n_group = $group;
         $simulation->batch_id = $this->id;
 
         $simulation->save();
@@ -745,20 +744,20 @@ class BatchEntry extends \yii\db\ActiveRecord
         for ($i = $theFirstYear; $i <= $theLastYear; $i++) {
             if ($i < $theLastYear) {
                 for ($y = $theFirstMonths; $y <= $theFirstMonth; $y++) {
-                    $this->setElement($simId, $y, $theFirstYear, 'EMPLOYEES INCOME TAX', $element[$i . $theFirstMonth]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang, 6);
-                    //$this->setElement($simId, $y, $theFirstYear, 'OTHER ALLOWANCE', ($element[$i . $theFirstMonth]['THR'] + $element[$i . $theFirstMonth]['CUTI TAHUNAN']) * $this->jumlah_orang);
+                    $this->setElement($simId, $y, $theFirstYear, 'EMPLOYEES INCOME TAX', $element[$i . $theFirstMonth]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang);
+                    $this->setElement($simId, $y, $theFirstYear, 'OTHER ALLOWANCE', ($element[$i . $theFirstMonth]['THR'] + $element[$i . $theFirstMonth]['CUTI TAHUNAN']) * $this->jumlah_orang);
 
-                    $this->setElement($simId, $y, $theFirstYear, 'THR', $element[$i . $theFirstMonth]['THR'], 15);
-                    $this->setElement($simId, $y, $theFirstYear, 'CUTI TAHUNAN', $element[$i . $theFirstMonth]['CUTI TAHUNAN'], 15);
+                    //$this->setElement($simId, $y, $theFirstYear, 'THR', $element[$i . $theFirstMonth]['THR']);
+                    //$this->setElement($simId, $y, $theFirstYear, 'CUTI TAHUNAN', $element[$i . $theFirstMonth]['CUTI TAHUNAN']);
 
                 }
             } else {
                 for ($y = $theFirstMonths; $y <= $theLastMonth; $y++) {
-                    $this->setElement($simId, $y, $theLastYear, 'EMPLOYEES INCOME TAX', $element[$i . $theMonths]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang, 6);
-                    //$this->setElement($simId, $y, $theLastYear, 'OTHER ALLOWANCE', ($element[$i . $theMonths]['THR'] + $element[$i . $theMonths]['CUTI TAHUNAN']) * $this->jumlah_orang);
+                    $this->setElement($simId, $y, $theLastYear, 'EMPLOYEES INCOME TAX', $element[$i . $theMonths]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang);
+                    $this->setElement($simId, $y, $theLastYear, 'OTHER ALLOWANCE', ($element[$i . $theMonths]['THR'] + $element[$i . $theMonths]['CUTI TAHUNAN']) * $this->jumlah_orang);
 
-                    $this->setElement($simId, $y, $theLastYear, 'THR', $element[$i . $theMonths]['THR'], 15);
-                    $this->setElement($simId, $y, $theLastYear, 'CUTI TAHUNAN', $element[$i . $theMonths]['CUTI TAHUNAN'], 15);
+                    //$this->setElement($simId, $y, $theLastYear, 'THR', $element[$i . $theMonths]['THR']);
+                    //$this->setElement($simId, $y, $theLastYear, 'CUTI TAHUNAN', $element[$i . $theMonths]['CUTI TAHUNAN']);
 
                 }
             }
@@ -773,44 +772,42 @@ class BatchEntry extends \yii\db\ActiveRecord
             if ($this->mstType->type == 'PROMOSI') {
                 if (!empty($batchEntry[$i]['SELISIH'])) {
                     foreach ($batchEntry[$i]['SELISIH'] as $row => $y) {
-                        $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $y['gaji dasar'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN GADAS']) ? 0 : $batchEntry[$i]['KENAIKAN GADAS']), 1);
-                        $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $y['tunjangan jabatan'] * $this->jumlah_orang, 4);
-                        $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $y['tbh'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN TBH']) ? 0 : $batchEntry[$i]['KENAIKAN TBH']), 5);
-                        $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $y['EMPLOYEE INCOME TAX'] * $this->jumlah_orang, 6);
-                        $this->setElement($simId, $theMonth, $theYear, 'BPJS KESEHATAN', $y[$i]['BPJS KESEHATAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']), 7);
-                        $this->setElement($simId, $theMonth, $theYear, 'BPJS KETENEGAKERJAAN', $y[$i]['BPJS KETENEGAKERJAAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']), 7);
-                        //$this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', $y['EMPLOYEES BPJS'] * $this->jumlah_orang + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
-                        $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI',  $y['rekomposisi'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN REKOMPOSISI']) ? 0 : $batchEntry[$i]['KENAIKAN REKOMPOSISI']), 16);
-                        $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $batchEntry[$i]['PMK'] * $this->jumlah_orang, null);
-                        $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $batchEntry[$i]['CUTI BESAR'] * $this->jumlah_orang, null);
+                        $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $y['gaji dasar'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN GADAS']) ? 0 : $batchEntry[$i]['KENAIKAN GADAS']));
+                        $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $y['tunjangan jabatan'] * $this->jumlah_orang);
+                        $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $y['tbh'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN TBH']) ? 0 : $batchEntry[$i]['KENAIKAN TBH']));
+                        $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $y['EMPLOYEE INCOME TAX'] * $this->jumlah_orang);
+                        $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', $y['EMPLOYEES BPJS'] * $this->jumlah_orang + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
+                        $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI',  $y['rekomposisi'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN REKOMPOSISI']) ? 0 : $batchEntry[$i]['KENAIKAN REKOMPOSISI']));
+                        $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $batchEntry[$i]['PMK'] * $this->jumlah_orang);
+                        $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $batchEntry[$i]['CUTI BESAR'] * $this->jumlah_orang);
                     }
                 }
                 else {
-                    $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', 0, 1);
-                    $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', 0, 4);
-                    $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', 0, 5);
-                    $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', 0,6);
-                    $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', 0, 7);
-                    $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI',  0, 16);
-                    $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', 0, null);
-                    $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', 0, null);
+                    $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI',  0);
+                    $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', 0);
+                    $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', 0);
                 }
             }
             else {
-            $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $batchEntry[$i]['GAJI DASAR'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN GADAS']) ? 0 : $batchEntry[$i]['KENAIKAN GADAS']), 1);
-            $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $batchEntry[$i]['TUNJAB'] * $this->jumlah_orang, 4);
-            $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $batchEntry[$i]['TBH'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN TBH']) ? 0 : $batchEntry[$i]['KENAIKAN TBH']), 5);
-            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $batchEntry[$i]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang, 6);
-            //$this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', ($batchEntry[$i]['BPJS KESEHATAN'] + $batchEntry[$i]['BPJS KETENEGAKERJAAN']) * $this->jumlah_orang + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
+            $this->setElement($simId, $theMonth, $theYear, 'BASE SALARIES', $batchEntry[$i]['GAJI DASAR'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN GADAS']) ? 0 : $batchEntry[$i]['KENAIKAN GADAS']));
+            $this->setElement($simId, $theMonth, $theYear, 'FUNCTIONAL ALLOWANCES', $batchEntry[$i]['TUNJAB'] * $this->jumlah_orang);
+            $this->setElement($simId, $theMonth, $theYear, 'LIVING COST ALLOWANCES', $batchEntry[$i]['TBH'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN TBH']) ? 0 : $batchEntry[$i]['KENAIKAN TBH']));
+            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES INCOME TAX', $batchEntry[$i]['EMPLOYEE INCOME TAX'] * $this->jumlah_orang);
+            $this->setElement($simId, $theMonth, $theYear, 'EMPLOYEES BPJS', ($batchEntry[$i]['BPJS KESEHATAN'] + $batchEntry[$i]['BPJS KETENEGAKERJAAN']) * $this->jumlah_orang + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
 
-            $this->setElement($simId, $theMonth, $theYear, 'BPJS KESEHATAN', $batchEntry[$i]['BPJS KESEHATAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']), 7);
-            $this->setElement($simId, $theMonth, $theYear, 'BPJS KETENEGAKERJAAN', $batchEntry[$i]['BPJS KETENEGAKERJAAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']), 7);
+            //$this->setElement($simId, $theMonth, $theYear, 'BPJS KESEHATAN', $batchEntry[$i]['BPJS KESEHATAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
+            //$this->setElement($simId, $theMonth, $theYear, 'BPJS KETENEGAKERJAAN', $batchEntry[$i]['BPJS KETENEGAKERJAAN'] + (empty($batchEntry[$i]['TOTAL KENAIKAN']) ? 0 : $batchEntry[$i]['TOTAL KENAIKAN']));
 
 
-            $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI', $batchEntry[$i]['REKOMPOSISI'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN REKOMPOSISI']) ? 0 : $batchEntry[$i]['KENAIKAN REKOMPOSISI']), 16);
+            $this->setElement($simId, $theMonth, $theYear, 'TUNJANGAN REKOMPOSISI', $batchEntry[$i]['REKOMPOSISI'] * $this->jumlah_orang + (empty($batchEntry[$i]['KENAIKAN REKOMPOSISI']) ? 0 : $batchEntry[$i]['KENAIKAN REKOMPOSISI']));
 
-            $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $batchEntry[$i]['PMK'] * $this->jumlah_orang, null);
-            $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $batchEntry[$i]['CUTI BESAR'] * $this->jumlah_orang, null);
+            $this->setElement($simId, $theMonth, $theYear, 'PENGHARGAAN MASA KERJA', $batchEntry[$i]['PMK'] * $this->jumlah_orang);
+            $this->setElement($simId, $theMonth, $theYear, 'CUTI BESAR', $batchEntry[$i]['CUTI BESAR'] * $this->jumlah_orang);
 
             }
 
@@ -854,8 +851,6 @@ class BatchEntry extends \yii\db\ActiveRecord
         $percentage = intval($xx['BatchEntry'][$currentIndex]['percentage']);
         $amount = floatval($xx['BatchEntry'][$currentIndex]['nilai']);
 
-        $element = $xx['SimulationDetail']['element'];
-        $n_group = $xx['SimulationDetail']['n_group'];
         $typeFilter = $xx['BatchEntry']['type_filter'];
         $totalPercentage = 0;
         $count = 0;
@@ -884,8 +879,7 @@ class BatchEntry extends \yii\db\ActiveRecord
                     $newFilter->bulan = $bulan;
                     $newFilter->tahun = $tahun;
                     $newFilter->amount = ((int)$this->amount * $percentage / 100);
-                    $newFilter->element = $element;
-                    $newFilter->n_group = $n_group;
+                    $newFilter->element = $this->mstElement->element_name;
                     $newFilter->save();
 
                     $newFilterIds[] = $newFilter->id;
@@ -900,8 +894,7 @@ class BatchEntry extends \yii\db\ActiveRecord
                         $data->bulan = $i;
                         $data->tahun = $tahun;
                         $data->amount = (($this->amount * $sisa / 100) / ($period - $count) * 1);
-                        $data->element = $element;
-                        $data->n_group = $n_group;
+                        $data->element = $this->mstElement->element_name;
                         $data->save();
                     }
                 }
@@ -929,8 +922,7 @@ class BatchEntry extends \yii\db\ActiveRecord
                     $newFilter->bulan = $bulan;
                     $newFilter->tahun = $tahun;
                     $newFilter->amount = $amount;
-                    $newFilter->element = $element;
-                    $newFilter->n_group = $n_group;
+                    $newFilter->element = $this->mstElement->element_name;
                     $newFilter->save();
 
                     $newFilterIds[] = $newFilter->id;
@@ -945,8 +937,7 @@ class BatchEntry extends \yii\db\ActiveRecord
                         $data->bulan = $i;
                         $data->tahun = $tahun;
                         $data->amount = (($sisa) / ($period - $count) * 1);
-                        $data->element = $element;
-                        $data->n_group = $n_group;
+                        $data->element = $this->mstElement->element_name;
                         $data->save();
                     }
                 }
@@ -960,8 +951,7 @@ class BatchEntry extends \yii\db\ActiveRecord
                 $data->bulan = $i;
                 $data->tahun = $tahun;
                 $data->amount = ((int)$this->amount / $getperiod * 1);
-                $data->element = $element;
-                $data->n_group = $n_group;
+                $data->element = $this->mstElement->element_name;
                 $data->save();
             }
 

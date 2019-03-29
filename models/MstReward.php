@@ -47,7 +47,6 @@ class MstReward extends \yii\db\ActiveRecord
             [['reward_name'], 'unique'],
             [['file'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf', 'maxSize' => 1028000, 'tooBig' => 'Limit is 1000KB'],
             [['icon'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg', 'maxSize'=>1024 * 1024 * 1],
-            [['icon'], 'required', 'on'=> 'create'],
             [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['categoryId' => 'id']],
         ];
     }

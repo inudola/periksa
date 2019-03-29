@@ -2,19 +2,19 @@
 
 namespace reward\controllers;
 
-use reward\models\RewardLog;
+use reward\models\UploadXlsxForm;
 use Yii;
-use reward\models\Setting;
-use reward\models\SettingSearch;
+use reward\models\Insentif;
+use reward\models\InsentifSearch;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * SettingController implements the CRUD actions for Setting model.
+ * InsentifController implements the CRUD actions for Insentif model.
  */
-class SettingController extends Controller
+class InsentifController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -45,23 +45,25 @@ class SettingController extends Controller
     }
 
     /**
-     * Lists all Setting models.
+     * Lists all Insentif models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new SettingSearch();
+        $searchModel = new InsentifSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->sort = ['defaultOrder' => ['setup_name'=>SORT_ASC]];
+
+        $uploadModel = new UploadXlsxForm();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'uploadModel' => $uploadModel
         ]);
     }
 
     /**
-     * Displays a single Setting model.
+     * Displays a single Insentif model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -74,22 +76,15 @@ class SettingController extends Controller
     }
 
     /**
-     * Creates a new Setting model.
+     * Creates a new Insentif model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Setting();
+        $model = new Insentif();
 
-        if ($model->load(Yii::$app->request->post()) ) {
-            if ($model->save()) {
-                //logging data
-                RewardLog::saveLog(Yii::$app->user->identity->username, "Create setting with ID ".$model->id);
-                Yii::$app->session->setFlash('success', "Your setting successfully created.");
-            } else {
-                Yii::$app->session->setFlash('error', "Your setting was not saved.");
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -99,7 +94,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Updates an existing Setting model.
+     * Updates an existing Insentif model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -109,14 +104,7 @@ class SettingController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) ) {
-            if ($model->save()) {
-                //logging data
-                RewardLog::saveLog(Yii::$app->user->identity->username, "Update setting with ID ".$model->id);
-                Yii::$app->session->setFlash('success', "Your setting successfully updated.");
-            } else {
-                Yii::$app->session->setFlash('error', "Your setting was not saved.");
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -126,7 +114,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Deletes an existing Setting model.
+     * Deletes an existing Insentif model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -134,35 +122,24 @@ class SettingController extends Controller
      */
     public function actionDelete($id)
     {
-        if ($this->findModel($id)->delete()) {
-            //logging data
-            RewardLog::saveLog(Yii::$app->user->identity->username, "Delete Setting with ID ".$id);
-            Yii::$app->session->setFlash('success', "Your setting successfully deleted.");
-        } else {
-            Yii::$app->session->setFlash('error', "Your setting was not deleted.");
-        }
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Setting model based on its primary key value.
+     * Finds the Insentif model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Setting the loaded model
+     * @return Insentif the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Setting::findOne($id)) !== null) {
+        if (($model = Insentif::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-
-    public function actionTes(){
-        return floatval(Setting::getBaseSetting('JP MAX UPAH'));
     }
 }

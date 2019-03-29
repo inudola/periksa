@@ -41,7 +41,6 @@ class MstElement extends \yii\db\ActiveRecord
             [['isYear', 'status', 'type'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['element_name'], 'string', 'max' => 40],
-            [['code'], 'unique'],
         ];
     }
 
@@ -55,7 +54,6 @@ class MstElement extends \yii\db\ActiveRecord
             'element_name' => 'Element Name',
             'isYear' => 'Element Type',
             'status' => 'Status',
-            'code' => 'Code',
             'type' => 'Type',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -65,7 +63,10 @@ class MstElement extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-
+    public function getElementDetails()
+    {
+        return $this->hasMany(ElementDetail::className(), ['mst_element_id' => 'id']);
+    }
 
     public function beforeSave($insert)
     {

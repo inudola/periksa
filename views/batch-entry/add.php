@@ -16,7 +16,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $model projection\models\BatchEntry */
 
-$this->title = 'Batch Entry';
+$this->title = 'Add Batch Entry';
 $this->params['breadcrumbs'][] = ['label' => 'Batch Entries', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -25,8 +25,7 @@ $simulationId = Yii::$app->getRequest()->getQueryParam('simId');
 $bulan = Yii::$app->getRequest()->getQueryParam('bulan');
 $tahun = Yii::$app->getRequest()->getQueryParam('tahun');
 
-//$detailTemplate = '{view}, {update}, {delete}';
-$detailTemplate = '{view}';
+$detailTemplate = '{view}, {update}, {delete}';
 $detailTemplates = '{view}, {export}';
 
 $catList = [
@@ -247,12 +246,12 @@ $keteranganList = [
                     <div class="box-body">
 
                         <?php $form = ActiveForm::begin([
-//                            'id' => 'tabular-form',
-//                            'enableAjaxValidation' => true,
-//                            'enableClientValidation' => true,
-//                            'validateOnChange' => false,
-//                            'validateOnSubmit' => true,
-//                            'validateOnBlur' => false,
+                            'id' => 'tabular-form',
+                            'enableAjaxValidation' => true,
+                            'enableClientValidation' => true,
+                            'validateOnChange' => false,
+                            'validateOnSubmit' => true,
+                            'validateOnBlur' => false,
                             'action' => Url::to(['simulation-detail/create']),
                         ]); ?>
 
@@ -261,13 +260,13 @@ $keteranganList = [
                             <?= $form->field($model1, 'bulan')->hiddenInput(['value' => $bulan])->label(false); ?>
                             <?= $form->field($model1, 'tahun')->hiddenInput(['value' => $tahun])->label(false); ?>
 
-                            <!--<div class="col-md-3">
-                                <?/*= $form->field($model, 'type_element')->dropDownList($catList, ['prompt' => '', 'id' => 'cat-id', 'required' => true]); */?>
+                            <div class="col-md-3">
+                                <?= $form->field($model, 'type_element')->dropDownList($catList, ['prompt' => '', 'id' => 'cat-id', 'required' => true]); ?>
                             </div>
 
                             <div class="col-md-3">
 
-                                <?/*= $form->field($model1, 'element')->widget(DepDrop::classname(), [
+                                <?= $form->field($model1, 'element')->widget(DepDrop::classname(), [
                                     'options' => ['id' => 'subcat-id', 'required' => true],
                                     'pluginOptions' => [
                                         'depends' => ['cat-id'],
@@ -275,30 +274,6 @@ $keteranganList = [
                                         'url' => Url::to(['/mst-element/lists'])
                                     ]
                                 ]);
-                                */?>
-                            </div>-->
-
-                            <div class="col-md-3">
-                                <?= $form->field($model1, 'element')->widget(Select2::classname(), [
-                                    'data' => ArrayHelper::map(\reward\models\MstElement::find()->asArray()->all(), 'element_name', 'element_name'),
-                                    'language' => 'en',
-                                    'options' => ['placeholder' => 'Select ...'],
-                                    'pluginOptions' => [
-                                        'allowClear' => true
-                                    ],
-                                ]);
-                                ?>
-                            </div>
-
-                            <div class="col-md-3">
-                                <?= $form->field($model1, 'n_group')->widget(Select2::classname(), [
-                                    'data' => ArrayHelper::map(\reward\models\MstNature::find()->asArray()->orderBy('nature_code')->where(['status' => 1])->all(), 'id', 'nature_name'),
-                                    'language' => 'en',
-                                    'options' => ['placeholder' => 'Select ...'],
-                                    'pluginOptions' => [
-                                        'allowClear' => true
-                                    ],
-                                ])->label('Group');
                                 ?>
                             </div>
 
@@ -348,13 +323,13 @@ $keteranganList = [
 
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs pull-right">
-                <li class="active"><a href="#tab_1-1" data-toggle="tab">Personnel Expense</a></li>
+                <li class="active"><a href="#tab_1-1" data-toggle="tab">Element</a></li>
 
                 <?php if ($mode == 'ORIGINAL BUDGET') { ?>
                     <li><a href="#tab_2-2" data-toggle="tab">Penyebab Kenaikan</a></li>
                 <?php } ?>
 
-                <li><a href="#tab_3-2" data-toggle="tab">Batch Entry</a></li>
+                <li><a href="#tab_3-2" data-toggle="tab">Batch</a></li>
 
                 <li class="pull-left header"><i class="fa fa-th"></i> Detail
                     Bulan <?= $bulan . ' ' . $tahun . ' (' . $mode . ')' ?></li>
@@ -370,16 +345,13 @@ $keteranganList = [
                                 'class' => 'yii\grid\SerialColumn',
                                 'contentOptions' => ['style' => 'width: 5%;']
                             ],
+
                             [
-                                'attribute' => 'mstNature.nature_code',
-                                'contentOptions' => ['style' => 'width: 15%;']
+                                'attribute' => 'element',
+                                'contentOptions' => ['style' => 'width: 47%;']
                             ],
                             [
-                                'attribute' => 'mstNature.nature_name',
-                                'contentOptions' => ['style' => 'width: 30%;']
-                            ],
-                            [
-                                'attribute' => 'my_sum',
+                                'attribute' => 'amount',
                                 'format' => ['decimal', 2],
                                 'contentOptions' => ['style' => 'width: 30%;']
 
@@ -391,19 +363,17 @@ $keteranganList = [
                                 'contentOptions' => ['style' => 'width: 25%;'],
                                 'buttons' => [
 
-                                    'view' => function ($url, $model, $key) {
+                                    'view' => function ($url, $model1, $key) {
                                         $urlConfig = [];
 
-                                        foreach ($model->primaryKey() as $pk) {
-                                            //$urlConfig['id'] = $model1->$pk;
-                                            $urlConfig['simId'] = $model->simulation_id;
-                                            $urlConfig['bulan'] = $model->bulan;
-                                            $urlConfig['tahun'] = $model->tahun;
-                                            $urlConfig['group'] = $model->n_group;
+                                        foreach ($model1->primaryKey() as $pk) {
+                                            $urlConfig['id'] = $model1->$pk;
                                         }
+//                                        $urlConfig['simId'] = $model->simulation_id;
+//                                        $urlConfig['bulan'] = $model->bulan;
+//                                        $urlConfig['tahun'] = $model->tahun;
 
-
-                                        $url = Url::toRoute(array_merge(['view-group'], $urlConfig));
+                                        $url = Url::toRoute(array_merge(['/simulation-detail/view-asli'], $urlConfig));
                                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
                                             $url, [
                                                 'title' => 'View',

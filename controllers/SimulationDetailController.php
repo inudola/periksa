@@ -115,9 +115,8 @@ class SimulationDetailController extends Controller
                 'simulation_id' => $model->simulation_id,
                 'bulan' => $model->bulan,
                 'tahun' => $model->tahun,
-                'element' => $model->element,
+                'element' => $model->mstElement->element_name,
                 'amount' => $model->amount,
-                'n_group' => $model->n_group,
                 'created_by' => $people->person_id
             ]);
 
@@ -128,8 +127,8 @@ class SimulationDetailController extends Controller
             } else {
                 Yii::$app->session->setFlash('error', "Your element was not saved.");
             }
-            return $this->redirect(['view', 'id' => $model->id]);
-            //return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+            //return $this->redirect(['view', 'id' => $model->id]);
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
         }
 
 

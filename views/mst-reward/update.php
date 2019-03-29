@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="mst-reward-update">
 
-    <?= $this->render('_formUpdate', [
+    <?= $this->render('_form', [
         'model' => $model,
     ]) ?>
 

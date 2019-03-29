@@ -17,6 +17,7 @@ $this->title = 'Projection Monitoring';
 
     <div class="simulation-detail-index">
 
+
         <!--box grafik-->
         <div class="box box-default color-palette-box">
             <div class="box-header with-border">
@@ -319,7 +320,6 @@ $this->title = 'Projection Monitoring';
                                         $dataProvider1->query->where(['simulation_id' => $model->simulation_id])
                                             ->andwhere(['bulan' => $model->bulan])
                                             ->andwhere(['tahun' => $model->tahun])
-                                            ->andWhere(['NOT', ['n_group' => null]])
                                             ->andwhere(['keterangan' => 'ORIGINAL BUDGET']);
 
                                         return Yii::$app->controller->renderPartial('detail', [
@@ -444,7 +444,6 @@ $this->title = 'Projection Monitoring';
                                             $dataProvider1->query->where(['simulation_id' => $model->simulation_id])
                                                 ->andwhere(['bulan' => $model->bulan])
                                                 ->andwhere(['tahun' => $model->tahun])
-                                                ->andWhere(['NOT', ['n_group' => null]])
                                                 ->andWhere(['IN', 'keterangan' , [$modeParams, 'ORIGINAL BUDGET']]);
 
                                             return Yii::$app->controller->renderPartial('detail', [

@@ -5,12 +5,12 @@ namespace reward\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use reward\models\Setting;
+use reward\models\Insentif;
 
 /**
- * SettingSearch represents the model behind the search form of `reward\models\Setting`.
+ * InsentifSearch represents the model behind the search form of `reward\models\Insentif`.
  */
-class SettingSearch extends Setting
+class InsentifSearch extends Insentif
 {
     /**
      * {@inheritdoc}
@@ -18,9 +18,9 @@ class SettingSearch extends Setting
     public function rules()
     {
         return [
-            [['id'], 'integer'],
-            [['setup_name', 'status', 'description', 'created_at', 'updated_at'], 'safe'],
-            [['value_max'], 'number'],
+            [['id', 'smt', 'tahun'], 'integer'],
+            [['nik', 'bi', 'band', 'organisasi_nku', 'tipe_organisasi', 'created_at', 'updated_at'], 'safe'],
+            [['nkk', 'nku', 'nki'], 'number'],
         ];
     }
 
@@ -42,7 +42,7 @@ class SettingSearch extends Setting
      */
     public function search($params)
     {
-        $query = Setting::find();
+        $query = Insentif::find();
 
         // add conditions that should always apply here
 
@@ -61,14 +61,20 @@ class SettingSearch extends Setting
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'value_max' => $this->value_max,
+            'smt' => $this->smt,
+            'tahun' => $this->tahun,
+            'nkk' => $this->nkk,
+            'nku' => $this->nku,
+            'nki' => $this->nki,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'setup_name', $this->setup_name])
-            ->andFilterWhere(['like', 'status', $this->status])
-            ->andFilterWhere(['like', 'description', $this->description]);
+        $query->andFilterWhere(['like', 'nik', $this->nik])
+            ->andFilterWhere(['like', 'bi', $this->bi])
+            ->andFilterWhere(['like', 'band', $this->band])
+            ->andFilterWhere(['like', 'organisasi_nku', $this->organisasi_nku])
+            ->andFilterWhere(['like', 'tipe_organisasi', $this->tipe_organisasi]);
 
         return $dataProvider;
     }

@@ -1,22 +1,12 @@
 <?php
 
 use kartik\alert\Alert;
-use reward\models\Employee;
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use kartik\select2\Select2;
 use reward\components\Helpers;
 
-$employeeUrl = Url::to(['employee/options']);
-
-$initEmployeeText = '';
-$employeeModel = Employee::findOne($model->nik);
-if ($employeeModel) {
-    $initEmployeeText = '[' . $employeeModel->nik . '] ' . $employeeModel->nama;
-}
 ?>
 
 <div class="simulation-form">
@@ -125,7 +115,6 @@ if ($employeeModel) {
             </div>
             <?php ActiveForm::end(); ?>
 
-            <p>Butuh Wizard ? Klik <?= Html::a('Disini', ['setting/generic-wizard']) ?> </p>
         </div>
     </div>
 </div>

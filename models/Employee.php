@@ -13,7 +13,6 @@ class Employee extends \common\models\Employee
 
     private $_isAdmin = false;
     private $_isAdminProjection = false;
-    private $_isApproval = false;
 
 
     public function getReward()
@@ -28,7 +27,6 @@ class Employee extends \common\models\Employee
         foreach ($baseReward as $item) {
             $baseQuery = Reward::find()
                 ->select(['mst_reward_id', 'amount'])
-                ->orderBy(['mst_reward_id' => SORT_ASC])
                 ->where(['isApproved' => Reward::APPROVED])
                 ->andFilterWhere(['mst_reward_id' => $item->id]);
 
@@ -70,9 +68,6 @@ class Employee extends \common\models\Employee
                 if (in_array('kota', $criteriaNames)) {
                     $baseQuery->andWhere(['gender' => $people->kota]);
                 }
-                if (in_array('band', $criteriaNames)) {
-                    $baseQuery->andWhere(['band' => $people->band]);
-                }
             } else {
                 // no rules.. default filter by band_individu
                 $baseQuery->andWhere(['band_individu' => $people->bi]);
@@ -86,7 +81,6 @@ class Employee extends \common\models\Employee
 
                 $theRewardName = \reward\models\MstReward::find()
                     ->select(['id', 'reward_name', 'categoryId', 'icon', 'description'])
-                    ->orderBy(['reward_name' => SORT_ASC])
                     ->where(['id' => $row['mst_reward_id']])
                     ->all();
 
@@ -101,20 +95,97 @@ class Employee extends \common\models\Employee
                         //$allResults[$rows['categoryId']]['total'] += $row['amount'];
 
                     }
-
-                    ksort($allResults, SORT_ASC);
                 }
             }
         }
-
 
         return $allResults;
 
     }
 
+    public
+    function getRewardDetail($id)
+    {
+        $employee = Yii::$app->user->identity->employee;
+        $people = Employee::find()->where(['nik' => $employee->nik])->one(); // test Employee doang, ganti pakai yg di atas
 
+        $baseReward = MstReward::findAll(['status' => MstReward::ACTIVE]);
+
+        $allResults = [];
+        // loop through all kind of reward
+        foreach ($baseReward as $item) {
+            $baseQuery = Reward::find()
+                ->select(['mst_reward_id', 'amount'])
+                ->where(['isApproved' => Reward::APPROVED])
+                ->andFilterWhere(['mst_reward_id' => $item->id])
+                ->andFilterWhere(['mst_reward_id' => $id]);
+
+            // get all criteria_name for this reward
+            $criteriaNamesQ = RewardCriteria::find()
+                ->select('criteria_name')
+                ->where(['mst_reward_id' => $item->id])
+                ->asArray()
+                ->all();
+
+            $criteriaNames = [];
+            foreach ($criteriaNamesQ as $cn) {
+                $criteriaNames[] = $cn['criteria_name'];
+            }
+
+            if (count($criteriaNames) > 0) {
+                // run if there's rule in table reward_criteria
+                if (in_array('band_individu', $criteriaNames)) {
+                    $baseQuery->andWhere(['band_individu' => $people->bi]);
+                }
+                if (in_array('marital_status', $criteriaNames)) {
+                    $baseQuery->andWhere(['marital_status' => $people->status_pernikahan]);
+                }
+                if (in_array('structural', $criteriaNames)) {
+                    $baseQuery->andWhere(['structural' => $people->structural]);
+                }
+                if (in_array('functional', $criteriaNames)) {
+                    $baseQuery->andWhere(['functional' => $people->functional]);
+                }
+                if (in_array('band_position', $criteriaNames)) {
+                    $baseQuery->andWhere(['band_position' => $people->bp]);
+                }
+                if (in_array('emp_category', $criteriaNames)) {
+                    $baseQuery->andWhere(['emp_category' => $people->employee_category]);
+                }
+                if (in_array('gender', $criteriaNames)) {
+                    $baseQuery->andWhere(['gender' => $people->gender]);
+                }
+                if (in_array('kota', $criteriaNames)) {
+                    $baseQuery->andWhere(['gender' => $people->kota]);
+                }
+            } else {
+                // no rules.. default filter by band_individu
+                $baseQuery->andWhere(['band_individu' => $people->bi]);
+            }
+
+
+            $thisResult = $baseQuery->all();
+
+            foreach ($thisResult as $row) {
+                $rowArray = $row->toArray();
+                // only add unique value to $allResults
+                if (!in_array($rowArray, $allResults)) {
+                    $allResults[] = $rowArray;
+                }
+
+            }
+
+        }
+        
+        //var_dump($allResults); exit();
+        return $allResults;
+        
+    }
+    
+    public
     function getTotalReward()
     {
+       
         $employee = Yii::$app->user->identity->employee;
         $people = Employee::find()->where(['nik' => $employee->nik])->one(); // test Employee doang, ganti pakai yg di atas
 
@@ -166,20 +237,19 @@ class Employee extends \common\models\Employee
                     $baseQuery->andWhere(['gender' => $people->gender]);
                 }
                 if (in_array('kota', $criteriaNames)) {
-                    $baseQuery->andWhere(['kota' => $people->kota]);
-                }
-                if (in_array('band', $criteriaNames)) {
-                    $baseQuery->andWhere(['band' => $people->band]);
+                    $baseQuery->andWhere(['gender' => $people->kota]);
                 }
             } else {
                 // no rules.. default filter by band_individu
                 $baseQuery->andWhere(['band_individu' => $people->bi]);
             }
+
+
             $thisResult = $baseQuery->all();
 
             foreach ($thisResult as $row) {
                 $theRewardName = \reward\models\MstReward::find()
-                    ->select(['reward_name', 'icon', 'description'])
+                    ->select(['reward_name', 'icon'])
                     ->where(['id' => $row['mst_reward_id']])
                     ->all();
 
@@ -236,6 +306,84 @@ class Employee extends \common\models\Employee
 
     }
 
+    public
+    function getRewardModal()
+    {
+        $employee = Yii::$app->user->identity->employee;
+        $people = Employee::find()->where(['nik' => $employee->nik])->one(); // test Employee doang, ganti pakai yg di atas
+
+
+        $baseReward = MstReward::findAll(['status' => MstReward::ACTIVE]);
+
+        //$group = [];
+        $allResults = [];
+        // loop through all kind of reward
+        foreach ($baseReward as $item) {
+            $baseQuery = Reward::find()
+                ->where(['isApproved' => Reward::APPROVED])
+                ->andFilterWhere(['mst_reward_id' => $item->id]);
+
+            // get all criteria_name for this reward
+            $criteriaNamesQ = RewardCriteria::find()
+                ->select('criteria_name')
+                ->where(['mst_reward_id' => $item->id])
+                ->asArray()
+                ->all();
+
+            $criteriaNames = [];
+            foreach ($criteriaNamesQ as $cn) {
+                $criteriaNames[] = $cn['criteria_name'];
+            }
+
+            if (count($criteriaNames) > 0) {
+                // run if there's rule in table reward_criteria
+                if (in_array('band_individu', $criteriaNames)) {
+                    $baseQuery->andWhere(['band_individu' => $people->bi]);
+                }
+                if (in_array('marital_status', $criteriaNames)) {
+                    $baseQuery->andWhere(['marital_status' => $people->status_pernikahan]);
+                }
+                if (in_array('structural', $criteriaNames)) {
+                    $baseQuery->andWhere(['structural' => $people->structural]);
+                }
+                if (in_array('functional', $criteriaNames)) {
+                    $baseQuery->andWhere(['functional' => $people->functional]);
+                }
+                if (in_array('band_position', $criteriaNames)) {
+                    $baseQuery->andWhere(['band_position' => $people->bp]);
+                }
+                if (in_array('emp_category', $criteriaNames)) {
+                    $baseQuery->andWhere(['emp_category' => $people->employee_category]);
+                }
+                if (in_array('gender', $criteriaNames)) {
+                    $baseQuery->andWhere(['gender' => $people->gender]);
+                }
+                if (in_array('kota', $criteriaNames)) {
+                    $baseQuery->andWhere(['gender' => $people->kota]);
+                }
+            } else {
+                // no rules.. default filter by band_individu
+                $baseQuery->andWhere(['band_individu' => $people->bi]);
+            }
+
+
+            $thisResult = $baseQuery->all();
+
+            foreach ($thisResult as $row) {
+
+                $rowArray = $row->toArray();
+                // only add unique value to $allResults
+                if (!in_array($rowArray, $allResults)) {
+                    $allResults[] = $rowArray;
+
+                }
+            }
+
+        }
+
+        return $allResults;
+
+    }
 
     public
     function getRewards()
@@ -269,23 +417,6 @@ class Employee extends \common\models\Employee
         return $this->_isAdmin;
     }
 
-
-    public
-    function getIsApproval()
-    {
-        $userRoles = Yii::$app->authManager->getRolesByUser($this->user->id);
-        $this->_isApproval = false;
-
-        foreach ($userRoles as $userRole) {
-            if ('reward_approval' == $userRole->name) {
-                $this->_isApproval = true;
-                break;
-            }
-        }
-
-        return $this->_isApproval;
-    }
-
     public
     function getIsAdminProjection()
     {
@@ -307,7 +438,9 @@ class Employee extends \common\models\Employee
     {
         $dates = Helpers::getMonthIterator($startDate, $endDate);
 
-        $totalPoint = Setting::getBaseSetting(Setting::INDEX_TOTAL_POINT);
+        //get value from setting model
+        $asumsiPoint = floatval(Setting::getBaseSetting(Setting::INDEX_ASUMSI_POINT));
+        $totalPoint = floatval(Setting::getBaseSetting(Setting::INDEX_TOTAL_POINT));
 
         $careerPath = [];
         $startDateTime = new \DateTime($startDate);
@@ -336,7 +469,6 @@ class Employee extends \common\models\Employee
             $path[$startDateTimeFmt]['bi'] = $startBi;
             $path[$startDateTimeFmt]['is_naik_bi'] = false;
             $path[$startDateTimeFmt]['saldo_nki'] = 0;
-            $path[$startDateTimeFmt]['emp_category'] = 'TRAINEE';
 
             $it = 0;
             $prevSemester = 0;
@@ -362,12 +494,6 @@ class Employee extends \common\models\Employee
 
                 $currentSemester = ceil(intval($date->format('m')) / 6);  // bulan ini semester berapa?
 
-                //get value from setting model
-                if ($currentSemester == 1) {
-                    $asumsiPoint = Setting::getBaseSetting(Setting::INDEX_ASUMSI_POINT_1);
-                } else {
-                    $asumsiPoint = Setting::getBaseSetting(Setting::INDEX_ASUMSI_POINT_2);
-                }
                 $theSaldoNki = null;
                 $dateFmt = $date->format('Ym');
                 $prevDateFmt = $prevDate->format('Ym');
@@ -375,7 +501,6 @@ class Employee extends \common\models\Employee
 
                 if (intval($dateFmt) > intval($dpeDateTime->format('Ym'))) {
                     // sudah jadi normal Employee --> pakai saldo_nki
-
                     if ($currentSemester != $prevSemester) {
                         // ganti semester, check tabel saldo_nki
                         $prevSemester = $currentSemester;
@@ -393,17 +518,14 @@ class Employee extends \common\models\Employee
                             $path[$dateFmt]['bi'] = $theSaldoNki->bi;
                             $path[$dateFmt]['is_naik_bi'] = false;
                             $path[$dateFmt]['saldo_nki'] = $theSaldoNki->total;
-                            $path[$dateFmt]['emp_category'] = 'PERMANENT';
                             $prevSaldoNki = $theSaldoNki;
 
-                        }
-                        else {
+                        } else {
                             $theSaldoNki = $prevSaldoNki;
 
                             $path[$dateFmt]['bi'] = $path[$prevDateFmt]['bi'];
                             $path[$dateFmt]['is_naik_bi'] = false;
                             $path[$dateFmt]['saldo_nki'] = $path[$prevDateFmt]['saldo_nki'] + $asumsiPoint;
-                            $path[$dateFmt]['emp_category'] = 'PERMANENT';
                         }
 
                         // check naik bi
@@ -411,8 +533,6 @@ class Employee extends \common\models\Employee
                             $path[$dateFmt]['bi'] = Helpers::nextBand($path[$dateFmt]['bi']);
                             $path[$dateFmt]['is_naik_bi'] = true;
                             $path[$dateFmt]['caused_by'] = 'KENAIKAN SALDO NKI';
-                            $path[$dateFmt]['emp_category'] = 'PERMANENT';
-
                             $path[$dateFmt]['nik'] = $this->nik;
                             $path[$dateFmt]['new_bi_band_1'] = 1;
                             $path[$dateFmt]['saldo_nki'] = 0;
@@ -422,7 +542,6 @@ class Employee extends \common\models\Employee
                             $path[$dateFmt]['bi'] = '1.a';
                             $path[$dateFmt]['is_naik_bi'] = true;
                             $path[$dateFmt]['caused_by'] = 'KENAIKAN TRAINEE KE 1.a';
-                            $path[$dateFmt]['emp_category'] = 'PERMANENT';
                             $path[$dateFmt]['nik'] = $this->nik;
                             $path[$dateFmt]['new_bi_band_1'] = 1;
                             $path[$dateFmt]['saldo_nki'] = 0;
@@ -430,7 +549,6 @@ class Employee extends \common\models\Employee
                             $path[$dateFmt]['bi'] = $path[$prevDateFmt]['bi'];
                             $path[$dateFmt]['is_naik_bi'] = false;
                             $path[$dateFmt]['saldo_nki'] = $path[$prevDateFmt]['saldo_nki'];
-                            $path[$dateFmt]['emp_category'] = 'PERMANENT';
                         }
 
                     }
@@ -439,7 +557,6 @@ class Employee extends \common\models\Employee
                     $path[$dateFmt]['bi'] = $startBi;
                     $path[$dateFmt]['is_naik_bi'] = false;
                     $path[$dateFmt]['saldo_nki'] = 0;
-                    $path[$dateFmt]['emp_category'] = 'TRAINEE';
 
                     if ($currentSemester != $prevSemester) {
                         $prevSemester = $currentSemester;
@@ -561,7 +678,6 @@ class Employee extends \common\models\Employee
             $startDateTimeFmt = $startDateTime->format('Ym');
 
             $currentSemester = ceil(intval($startDateTime->format('m')) / 6);  // bulan ini semester berapa?
-
             $currentYear = intval($startDateTime->format('Y'));
 
             $theSaldoNki = SaldoNki::find()->where([
@@ -606,14 +722,6 @@ class Employee extends \common\models\Employee
                 $prevDate = $prevDate->modify('-1 month');
 
                 $currentSemester = ceil(intval($date->format('m')) / 6);  // bulan ini semester berapa?
-
-                //get value from setting model
-                if ($currentSemester == 1) {
-                    $asumsiPoint = Setting::getBaseSetting(Setting::INDEX_ASUMSI_POINT_1);
-                } else {
-                    $asumsiPoint = Setting::getBaseSetting(Setting::INDEX_ASUMSI_POINT_2);
-                }
-
                 $currentYear = intval($date->format('Y'));
 
                 $theSaldoNki = null;

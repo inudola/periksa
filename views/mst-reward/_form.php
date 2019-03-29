@@ -2,7 +2,6 @@
 
 use dosamigos\ckeditor\CKEditor;
 use kartik\alert\Alert;
-use kartik\file\FileInput;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;

@@ -22,7 +22,6 @@ use Yii;
  * @property mixed parent_id
  * @property mixed keterangan
  * @property mixed updated_by
- * @property mixed n_group
  */
 class SimulationDetail extends \yii\db\ActiveRecord
 {
@@ -50,7 +49,7 @@ class SimulationDetail extends \yii\db\ActiveRecord
     {
         return [
             [['simulation_id', 'bulan', 'tahun', 'amount'], 'required'],
-            [['simulation_id', 'bulan', 'tahun', 'batch_id', 'n_group'], 'integer'],
+            [['simulation_id', 'bulan', 'tahun', 'batch_id', 'parent_id'], 'integer'],
             //[['amount'], 'number'],
             [['created_at', 'updated_at', 'updated_by', 'created_by'], 'safe'],
             [['element', 'keterangan'], 'string', 'max' => 64],
@@ -70,7 +69,6 @@ class SimulationDetail extends \yii\db\ActiveRecord
             'bulan' => 'Bulan',
             'tahun' => 'Tahun',
             'element' => 'Element',
-            'n_group' => 'Personnel Expense',
             'amount' => 'Amount',
             'batch_id' => 'Type Batch',
             'keterangan' => 'Keterangan',
@@ -190,9 +188,9 @@ class SimulationDetail extends \yii\db\ActiveRecord
         return $this->hasOne(PayrollResult::className(), ['period_bulan' => 'bulan']);
     }
 
-    public function getMstNature()
+    public function getMstElement()
     {
-        return $this->hasOne(MstNature::className(), ['id' => 'n_group']);
+        return $this->hasOne(MstElement::className(), ['id' => 'element']);
     }
 
 }

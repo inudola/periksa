@@ -118,7 +118,9 @@ use yii\helpers\ArrayHelper;
                     ]);
                     ?>
                 </div>
-
+                <div class="col-md-4">
+                    <?= $form->field($model, 'isApproved')->dropDownList([-1 => 'Pending', 1 => 'Approved', 0 => 'Rejected'], ['prompt' => '']) ?>
+                </div>
             </div>
 
             <div class="row">

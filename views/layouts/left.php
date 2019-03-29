@@ -21,7 +21,7 @@ $menus = [
 
     ['label' => 'Simulation', 'icon' => 'list-alt', 'url' => ['simulation/index'], 'visible' => $isAdminProjection],
 
-    ['label' => 'MASTER DATA', 'options' => ['class' => 'header'], 'visible' => $isAdmin || $isAdminProjection],
+    ['label' => 'MASTER DATA', 'options' => ['class' => 'header'], 'visible' => $isAdmin],
     [
         'label' => 'Master',
         'icon' => 'table',
@@ -29,15 +29,16 @@ $menus = [
         'items' => [
             ['label' => 'Category Type', 'icon' => 'pencil-square', 'url' => ['category-type/index'], 'visible' => $isAdmin],
             ['label' => 'Category', 'icon' => 'pencil-square', 'url' => ['category/index'], 'visible' => $isAdmin],
-            ['label' => 'Knowledge', 'icon' => 'pencil-square', 'url' => ['knowledge/index'], 'visible' => $isAdmin],
+            ['label' => 'Knowledge', 'icon' => 'pencil-square', 'url' => ['knowledge/index'], 'visible' => (!Yii::$app->user->isGuest)],
             ['label' => 'Reward', 'icon' => 'pencil-square', 'url' => ['mst-reward/index'], 'visible' => $isAdmin],
-            ['label' => 'Recruitment Type', 'icon' => 'pencil-square', 'url' => ['mst-type/index'], 'visible' => $isAdminProjection],
-            ['label' => 'Element', 'icon' => 'pencil-square', 'url' => ['mst-element/index'], 'visible' =>$isAdminProjection],
+            ['label' => 'Recruitment Type', 'icon' => 'pencil-square', 'url' => ['mst-type/index'], 'visible' => $isAdmin],
+            ['label' => 'Element', 'icon' => 'pencil-square', 'url' => ['mst-element/index'], 'visible' => $isAdmin],
             ['label' => 'Saldo NKI', 'icon' => 'pencil-square', 'url' => ['saldo/index'], 'visible' => $isAdminProjection],
-            ['label' => 'Realization', 'icon' => 'pencil-square', 'url' => ['payroll-result/index'], 'visible' => $isAdminProjection],
+            ['label' => 'Insentif', 'icon' => 'pencil-square', 'url' => ['insentif/index'], 'visible' => $isAdminProjection],
+            ['label' => 'Realization', 'icon' => 'pencil-square', 'url' => ['payroll-result/index'], 'visible' => $isAdmin],
 
         ],
-        //'visible' => (Yii::$app->user->can('sysadmin') || $isAdmin || $isAdminProjection),
+        'visible' => (Yii::$app->user->can('sysadmin') || $isAdmin || $isAdminProjection),
     ],
     [
         'label' => 'Settings',

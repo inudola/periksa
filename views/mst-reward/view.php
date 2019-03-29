@@ -13,13 +13,7 @@ $this->title = $model->reward_name;
 $this->params['breadcrumbs'][] = ['label' => 'Reward', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$isApproval = Yii::$app->user->identity->employee->isApproval;
-
-if ($isApproval) {
-    $detailTemplate = '{update}, {delete}, {approve}';
-} else {
-    $detailTemplate = '{update}, {delete}';
-}
+$detailTemplate = '{update}, {delete}';
 $fieldExists = [];
 foreach (\reward\components\Helpers::getCriteria() as $criterion => $desc) {
     $fieldExists[$criterion] = false;
@@ -243,7 +237,20 @@ foreach (\reward\components\Helpers::getCriteria() as $criterion => $desc) {
                             'class' => 'yii\grid\ActionColumn',
                             'header' => 'Action',
                             'buttons' => [
+                                'view' => function ($url, $model, $key) {
+                                    $urlConfig = [];
+                                    foreach ($model->primaryKey() as $pk) {
+                                        $urlConfig['id'] = $model->$pk;
+                                    }
 
+                                    $url = Url::toRoute(array_merge(['/reward/view'], $urlConfig));
+                                    return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
+                                        $url, [
+                                            'title' => 'View',
+                                            'data-pjax' => '0',
+                                            'class' => 'btn btn-sm btn-info',
+                                        ]);
+                                },
                                 'update' => function ($url, $model, $key) {
                                     $urlConfig = [];
                                     foreach ($model->primaryKey() as $pk) {
@@ -275,21 +282,7 @@ foreach (\reward\components\Helpers::getCriteria() as $criterion => $desc) {
                                                 'method' => 'post',
                                             ],
                                         ]);
-                                },
-                                'approve' => function ($url, $model, $key) {
-                                    $urlConfig = [];
-                                    foreach ($model->primaryKey() as $pk) {
-                                        $urlConfig['id'] = $model->$pk;
-                                    }
-
-                                    $url = Url::toRoute(array_merge(['/reward/approve'], $urlConfig));
-                                    return Html::a('<span class="glyphicon glyphicon-check"></span>',
-                                        $url, [
-                                            'title' => 'Approve',
-                                            'data-pjax' => '0',
-                                            'class' => 'btn btn-sm btn-info',
-                                        ]);
-                                },
+                                }
                             ],
                             'template' => $detailTemplate
                         ],

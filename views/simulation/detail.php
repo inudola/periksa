@@ -23,13 +23,10 @@ $detailTemplate = '{update}, {delete}';
             ['class' => 'kartik\grid\SerialColumn',
                 'contentOptions' => ['style' => 'width: 10%;']
             ],
+
             [
-                'attribute' => 'mstNature.nature_code',
-                'contentOptions' => ['style' => 'width: 15%;']
-            ],
-            [
-                'attribute' => 'mstNature.nature_name',
-                'contentOptions' => ['style' => 'width: 30%;']
+                'attribute' => 'element',
+                'contentOptions' => ['style' => 'width: 45%;']
             ],
             [
                 'attribute' => 'my_sum',

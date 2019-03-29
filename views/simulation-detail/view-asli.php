@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model projection\models\SimulationDetail */
 
-$this->title = $model->element . ' - ' . $model->GetMonth() . ' ' . $model->tahun;
+$this->title = 'Simulation Detail' . ' ' . $model->GetMonth() . ' ' . $model->tahun;
 $this->params['breadcrumbs'][] = ['label' => 'Simulation Details', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 

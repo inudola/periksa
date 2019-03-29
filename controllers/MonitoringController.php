@@ -107,7 +107,6 @@ class MonitoringController extends Controller
             ->select(['SUM(amount) AS cnt'])
             ->from('simulation_detail')
             ->where(['simulation_id' => $lastProjection])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->groupBy(['bulan'])
             ->column();
 
@@ -135,7 +134,7 @@ class MonitoringController extends Controller
 
 
         /*=============get total projection==============*/
-        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $lastProjection])->andWhere(['NOT', ['n_group' => null]]);
+        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $lastProjection]);
         $sumProjection = $queryProjection->sum('amount');
 
         /*=============get total realization==============*/
@@ -251,7 +250,6 @@ class MonitoringController extends Controller
             ->where(['simulation_id' => $id])
             ->andWhere(['is', 'parent_id', new \yii\db\Expression('null')])
             ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET'])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->groupBy(['bulan', 'tahun'])
             ->orderBy([
                 'tahun' => SORT_ASC,
@@ -276,7 +274,6 @@ class MonitoringController extends Controller
             ->where(['simulation_id' => $id])
             //->andWhere(['not', ['parent_id' => null]])
             ->andFilterWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->groupBy(['bulan', 'tahun'])
             ->orderBy([
                 'tahun' => SORT_ASC,
@@ -312,11 +309,11 @@ class MonitoringController extends Controller
 
         /*====================get total data start=========================*/
         //original
-        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
+        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $id])
             ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
 
         //alternatif
-        $queryAlt = SimulationDetail::find()->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
+        $queryAlt = SimulationDetail::find()->where(['simulation_id' => $id])
             ->andWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']]);
 
         $sumAlternatif = $queryAlt->sum('amount');
@@ -337,8 +334,7 @@ class MonitoringController extends Controller
         $searchModel = new SimulationDetailSearch();
         $dataProvider = $searchModel->search11(Yii::$app->request->queryParams);
             //$dataProvider->sort = ['defaultOrder' => ['tahun'=>SORT_ASC]];
-        $dataProvider->query->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
-            ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
+        $dataProvider->query->where(['simulation_id' => $id])->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
         /*====================get data simulation end=========================*/
 
 
@@ -346,8 +342,7 @@ class MonitoringController extends Controller
         $searchModel = new SimulationDetailSearch();
         $dataProviderAlt = $searchModel->search11(Yii::$app->request->queryParams);
         $dataProviderAlt->sort = ['defaultOrder' => ['tahun' => SORT_ASC, 'bulan' => SORT_ASC]];
-        $dataProviderAlt->query->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
-            ->andWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']]);
+        $dataProviderAlt->query->where(['simulation_id' => $id])->andWhere(['IN', 'keterangan' , [$mode, 'ORIGINAL BUDGET']]);
         /*====================get data simulation end=========================*/
 
 
@@ -455,7 +450,6 @@ class MonitoringController extends Controller
             ->select(['SUM(amount) AS cnt'])
             ->from('simulation_detail')
             ->where(['simulation_id' => $lastProjection])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->groupBy(['bulan'])
             ->column();
 
@@ -484,7 +478,7 @@ class MonitoringController extends Controller
 
 
         /*=============get total projection==============*/
-        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $lastProjection])->andWhere(['NOT', ['n_group' => null]]);
+        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $lastProjection]);
         $sumProjection = $queryProjection->sum('amount');
 
         /*=============get total realization==============*/
@@ -551,7 +545,6 @@ class MonitoringController extends Controller
             ->from('simulation_detail')
             ->where(['simulation_id' => $id])
             ->andWhere(['is', 'parent_id', new \yii\db\Expression('null')])
-            ->andWhere(['NOT', ['n_group' => null]])
             ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET'])
             ->groupBy(['bulan', 'tahun'])
             ->orderBy([
@@ -594,7 +587,7 @@ class MonitoringController extends Controller
 
         /*====================get total data start=========================*/
         //original
-        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
+        $queryProjection = SimulationDetail::find()->where(['simulation_id' => $id])
             ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
 
 
@@ -615,8 +608,7 @@ class MonitoringController extends Controller
         $searchModel = new SimulationDetailSearch();
         $dataProvider = $searchModel->search11(Yii::$app->request->queryParams);
         //$dataProvider->sort = ['defaultOrder' => ['tahun'=>SORT_ASC]];
-        $dataProvider->query->where(['simulation_id' => $id])->andWhere(['NOT', ['n_group' => null]])
-            ->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
+        $dataProvider->query->where(['simulation_id' => $id])->andFilterWhere(['keterangan' => 'ORIGINAL BUDGET']);
         /*====================get data simulation end=========================*/
 
 

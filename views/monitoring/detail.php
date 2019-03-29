@@ -27,13 +27,17 @@ use kartik\grid\GridView;
             ['class' => 'kartik\grid\SerialColumn',
                 'contentOptions' => ['style' => 'width: 7%;']
             ],
+
+//            [
+//                'attribute' => 'bulan',
+//                'value' => function ($model) {
+//                    return $model->GetMonth();
+//                }
+//            ],
+//            'tahun',
             [
-                'attribute' => 'mstNature.nature_code',
-                'contentOptions' => ['style' => 'width: 15%;']
-            ],
-            [
-                'attribute' => 'mstNature.nature_name',
-                'contentOptions' => ['style' => 'width: 30%;']
+                'attribute' => 'element',
+                'contentOptions' => ['style' => 'width: 47%;']
             ],
             [
                 'attribute' => 'my_sum',

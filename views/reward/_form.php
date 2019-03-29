@@ -34,7 +34,14 @@ use reward\models\MstCity;
         <div class="box">
             <div class="box-body">
 
-                <?php $form = ActiveForm::begin(); ?>
+                <?php $form = ActiveForm::begin([
+                    'id' => 'tabular-form',
+                    'enableAjaxValidation' => true,
+                    'enableClientValidation' => true,
+                    'validateOnChange' => false,
+                    'validateOnSubmit' => true,
+                    'validateOnBlur' => false,
+                ]); ?>
 
                 <div class="row">
 
@@ -91,10 +98,10 @@ use reward\models\MstCity;
                         TabularInput::widget([
                             'models' => $models,
                             'attributeOptions' => [
-                                'enableAjaxValidation' => false,
-                                'enableClientValidation' => false,
+                                'enableAjaxValidation' => true,
+                                'enableClientValidation' => true,
                                 'validateOnChange' => false,
-                                'validateOnSubmit' => false,
+                                'validateOnSubmit' => true,
                                 'validateOnBlur' => false,
                             ],
                             'id' => 'reward',
@@ -217,7 +224,7 @@ $(document).ready(function () {
             } else{
                 //click btnGenerate
                 $('.se-pre-con').show();
-                //$("#tabular-form").submit();
+                $("#tabular-form").submit();
                 //return true;
             }
         });

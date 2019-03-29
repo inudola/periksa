@@ -1,7 +1,5 @@
 <?php
 
-use kartik\alert\Alert;
-use kartik\select2\Select2;
 use kartik\widgets\DepDrop;
 use unclead\multipleinput\MultipleInputColumn;
 use unclead\multipleinput\TabularInput;
@@ -26,88 +24,37 @@ $filterList = [
 ?>
 
     <div class="batch-entry-form">
-
-        <!-- alert message for parent ID-->
-        <?php
-        echo Alert::widget([
-            'type' => Alert::TYPE_WARNING,
-            'title' => 'Warning!',
-            'icon' => 'glyphicon glyphicon-exclamation-sign',
-            'body' => "Element field can't be empty, please enter element first!",
-            'showSeparator' => false,
-            'delay' => false,
-            'options' => ['id'=>'msg-parent-element', 'style' => 'display:none;'],
-        ]);
-        ?>
-        <?php
-        echo Alert::widget([
-            'type' => Alert::TYPE_WARNING,
-            'title' => 'Warning!',
-            'icon' => 'glyphicon glyphicon-exclamation-sign',
-            'body' => "Some data doesn't have proposed group, please enter group first!",
-            'showSeparator' => false,
-            'delay' => false,
-            'options' => ['id'=>'msg-parent-group', 'style' => 'display:none;'],
-        ]);
-        ?>
-        <?php
-        echo Alert::widget([
-            'type' => Alert::TYPE_WARNING,
-            'title' => 'Warning!',
-            'icon' => 'glyphicon glyphicon-exclamation-sign',
-            'body' => "Some data doesn't have proposed amount, please enter amount first!",
-            'showSeparator' => false,
-            'delay' => false,
-            'options' => ['id'=>'msg-parent-amount', 'style' => 'display:none;'],
-        ]);
-        ?>
         <div class="box">
+
 
             <div class="box-body">
 
-                <?php $form = ActiveForm::begin(); ?>
+                <?php $form = ActiveForm::begin([
+                    'id' => 'tabular-form',
+                    'enableAjaxValidation' => true,
+                    'enableClientValidation' => true,
+                    'validateOnChange' => false,
+                    'validateOnSubmit' => true,
+                    'validateOnBlur' => false,
+                ]); ?>
 
                 <div class="row">
                     <?= $form->field($model1, 'simulation_id')->hiddenInput(['value' => $simulationId])->label(false); ?>
 
-<!--                    <div class="col-md-4">
-                        <?/*= $form->field($model, 'type_element')->dropDownList($catList, ['prompt' => '', 'id' => 'cat-id', 'required' => true]); */?>
-                    </div>-->
+                    <div class="col-md-4">
+                        <?= $form->field($model, 'type_element')->dropDownList($catList, ['prompt' => '', 'id' => 'cat-id', 'required' => true]); ?>
+                    </div>
 
-<!--                    <div class="col-md-4">
+                    <div class="col-md-4">
 
-                        <?/*= $form->field($model1, 'element')->widget(DepDrop::classname(), [
+                        <?= $form->field($model, 'type_id')->widget(DepDrop::classname(), [
                             'options' => ['id' => 'subcat-id', 'required' => true],
                             'pluginOptions' => [
                                 'depends' => ['cat-id'],
                                 'placeholder' => 'Select ...',
                                 'url' => Url::to(['/mst-element/lists'])
                             ]
-                        ])->label('Element Name');
-                        */?>
-                    </div>-->
-
-                    <div class="col-md-4">
-                        <?= $form->field($model1, 'element')->widget(Select2::classname(), [
-                            'data' => ArrayHelper::map(\reward\models\MstElement::find()->asArray()->all(), 'element_name', 'element_name'),
-                            'language' => 'en',
-                            'options' => ['placeholder' => 'Select ...'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
                         ]);
-                        ?>
-                    </div>
-
-                    <div class="col-md-4">
-                        <?= $form->field($model1, 'n_group')->widget(Select2::classname(), [
-                            'data' => ArrayHelper::map(\reward\models\MstNature::find()->asArray()->orderBy('nature_code')->where(['status' => 1])->all(), 'id', 'nature_name'),
-                            'language' => 'en',
-                            'options' => ['placeholder' => 'Select ...'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ])->label('Group');
                         ?>
                     </div>
 
@@ -125,117 +72,121 @@ $filterList = [
                                 'removeMaskOnSubmit' => true,
                                 'required' => true
                             ],
+
+
                         ]);
                         ?>
                     </div>
                 </div>
 
-                <hr/>
+                <hr>
                 <div class="row">
                     <div class="col-md-12">
-                        <h4 style="color: red">Advance Filter </h4>
+                        <div class="box">
+                            <div class="box-body">
+                                <h4>Advance Filter </h4>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <?= $form->field($model, 'type_filter')->dropDownList($filterList, ['prompt' => '', 'id' => 'filter-id']); ?>
+                                <div class="form-group">
+                                    <div class="col-md-4" style="padding: 0">
+                                        <?= $form->field($model, 'type_filter')->dropDownList($filterList, ['prompt' => '', 'id' => 'filter-id', 'required' => true]); ?>
+                                    </div>
+                                </div>
+
+                                <div class="form-group type_filter" style="display:none;">
+                                    <?=
+                                    TabularInput::widget([
+                                        'models' => $models,
+                                        'attributeOptions' => [
+                                            'enableAjaxValidation' => true,
+                                            'enableClientValidation' => true,
+                                            'validateOnChange' => false,
+                                            'validateOnSubmit' => true,
+                                            'validateOnBlur' => false,
+                                        ],
+                                        'id' => 'reward',
+                                        'allowEmptyList' => false,
+                                        'cloneButton' => true,
+
+                                        'columns' => [
+                                            [
+                                                'name' => 'bulan',
+                                                'type' => MultipleInputColumn::TYPE_DROPDOWN,
+                                                'enableError' => true,
+                                                'title' => 'Bulan',
+                                                'items' => ArrayHelper::map(\reward\models\SimulationDetail::findAll(['simulation_id' => $simulationId]), 'bulan', 'bulan'),
+                                                'options' => ['prompt' => ''],
+                                                'headerOptions' => [
+                                                    //'style' => 'width: 30%;',
+                                                    'class' => 'day-css-class'
+                                                ],
+
+                                            ],
+
+                                            [
+                                                'name' => 'percentage',
+                                                'title' => 'Percentage',
+                                                'enableError' => true,
+                                                'options' => [
+                                                    'id' => 'filter-percentage',
+                                                    'class' => 'input-priority',
+                                                    'style' => 'margin-left:5px;',
+                                                    'value' => '50',
+                                                    'size' => '25',
+                                                    'onkeypress' => 'return forceNumber(event)',
+                                                    'onkeyup' => 'this.value=numberWithCommas(this.value)',
+                                                    'allowEmptyList' => false,
+                                                    'autocomplete' => 'off'
+                                                ],
+                                                'headerOptions' => [
+                                                    'style' => 'margin-left:15px;',
+                                                    'id' => 'title-percentage'
+                                                ]
+                                            ],
+
+                                            [
+                                                'name' => 'nilai',
+                                                'title' => 'Amount',
+                                                'enableError' => true,
+                                                'options' => [
+                                                    'id' => 'filter-nilai',
+                                                    'class' => 'input-priority',
+                                                    'style' => 'margin-left:5px;',
+                                                    'value' => '50',
+                                                    'size' => '25',
+                                                    'onkeypress' => 'return forceNumber(event)',
+                                                    'onkeyup' => 'this.value=numberWithCommas(this.value)',
+                                                    'allowEmptyList' => false,
+                                                    'autocomplete' => 'off'
+                                                ],
+                                                'headerOptions' => [
+                                                    'style' => 'margin-left:15px;',
+                                                    'id' => 'title-amount'
+                                                ]
+                                            ],
+                                        ],
+                                    ]);
+
+                                    ?>
+                                </div>
+
                             </div>
                         </div>
-
-                        <div class="row type_filter" style="display:none;">
-                            <div class="col-md-4">
-                                <?=
-                                TabularInput::widget([
-                                    'models' => $models,
-                                    'attributeOptions' => [
-                                        'enableAjaxValidation' => false,
-                                        'enableClientValidation' => false,
-                                        'validateOnChange' => false,
-                                        'validateOnSubmit' => false,
-                                        'validateOnBlur' => false,
-                                    ],
-                                    'id' => 'reward',
-                                    'allowEmptyList' => false,
-                                    'cloneButton' => true,
-
-                                    'columns' => [
-                                        [
-                                            'name' => 'bulan',
-                                            'type' => MultipleInputColumn::TYPE_DROPDOWN,
-                                            'enableError' => true,
-                                            'title' => 'Bulan',
-                                            'items' => ArrayHelper::map(\reward\models\SimulationDetail::findAll(['simulation_id' => $simulationId]), 'bulan', 'bulan'),
-                                            'options' => ['prompt' => ''],
-                                            'headerOptions' => [
-                                                'style' => 'width: 30%;',
-                                                'class' => 'day-css-class'
-                                            ],
-
-                                        ],
-
-                                        [
-                                            'name' => 'percentage',
-                                            'title' => 'Percentage',
-                                            'enableError' => true,
-                                            'options' => [
-                                                'id' => 'filter-percentage',
-                                                'class' => 'input-priority',
-                                                'style' => 'margin-left:5px;',
-                                                'value' => '50',
-                                                'size' => '25',
-                                                'onkeypress' => 'return forceNumber(event)',
-                                                'onkeyup' => 'this.value=numberWithCommas(this.value)',
-                                                'allowEmptyList' => false,
-                                                'autocomplete' => 'off'
-                                            ],
-                                            'headerOptions' => [
-                                                'style' => 'margin-left:15px;',
-                                                'id' => 'title-percentage'
-                                            ]
-                                        ],
-
-                                        [
-                                            'name' => 'nilai',
-                                            'title' => 'Amount',
-                                            'enableError' => true,
-                                            'options' => [
-                                                'id' => 'filter-nilai',
-                                                'class' => 'input-priority',
-                                                'style' => 'margin-left:5px;',
-                                                'value' => '50',
-                                                'size' => '25',
-                                                'onkeypress' => 'return forceNumber(event)',
-                                                'onkeyup' => 'this.value=numberWithCommas(this.value)',
-                                                'allowEmptyList' => false,
-                                                'autocomplete' => 'off'
-                                            ],
-                                            'headerOptions' => [
-                                                'style' => 'margin-left:15px;',
-                                                'id' => 'title-amount'
-                                            ]
-                                        ],
-                                    ],
-                                ]);
-
-                                ?>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
-                <hr/>
+
+
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <?= Html::submitButton('Save', ['id' => 'btnSubmit', 'class' => 'btn btn-success']) ?>
-                        </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
                     </div>
+                </div>
                 </div>
 
                 <?php ActiveForm::end(); ?>
             </div>
-
-
         </div>
+
     </div>
 
 
@@ -337,41 +288,6 @@ $(document).ready(function () {
             }
 
     });
-    
-    $("#btnSubmit").click(function(){
-            var group = $("#simulationdetail-n_group").val();
-            var element = $("#simulationdetail-element").val();
-            var amount = $("#batchentry-amount").val();
-            
-        
-            if(element.length <= 0){
-                //show msg warning
-                $("#msg-parent-element").fadeIn();
-                setTimeout(function() {
-                    $("#msg-parent-element").fadeOut();
-                }, 5000);
-                return false;
-            } else if(group.length <= 0){
-                //show msg warning
-                $("#msg-parent-group").fadeIn();
-                setTimeout(function() {
-                    $("#msg-parent-group").fadeOut();
-                }, 5000);
-                return false;
-            } else if(amount.length <= 0){
-                //show msg warning
-                $("#msg-parent-amount").fadeIn();
-                setTimeout(function() {
-                    $("#msg-parent-amount").fadeOut();
-                }, 5000);
-                return false;
-            } else{
-                //click btnGenerate
-                $('.se-pre-con').show();
-                //$("#form_generate").submit();
-                //return true;
-            }
-        });
 });
 
 JS;

@@ -3,7 +3,6 @@
 namespace reward\controllers;
 
 use common\models\LoginForm;
-use DateTime;
 use reward\models\MstReward;
 use reward\models\PayrollResultOci;
 use reward\models\Reward;
@@ -25,6 +24,7 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
+
     public function behaviors()
     {
         return [
@@ -97,51 +97,50 @@ class SiteController extends Controller
 
         $model = Employee::instance()->getReward();
 
-        $people = Yii::$app->user->identity->employee;
-        $basedata = $people->salary + $people->tunjangan + $people->tunjangan_rekomposisi;
-        $basedataFull = $people->salary + $people->tunjangan + $people->tunjangan_jabatan + $people->tunjangan_rekomposisi;
-
         $result['mst_reward'] = MstReward::find()->count();
         $result['category'] = Category::find()->count();
         $result['simulation'] = Simulation::find()->count();
 
-        //get masa kerja
-        $tahunMasuk = date("Y-m", strtotime($people->tanggal_masuk));
-        $currentYear = date("Y-m");
-        $diff = (new DateTime($tahunMasuk))->diff(new DateTime($currentYear));
-        $masaKerja = $diff->m + $diff->y * 12;
+        $theMstReward = MstReward::find()->asArray()->all();
 
-        //get value from setting model
+//uang saku
+        $keyUangSaku = array_search('Uang Saku', array_column($theMstReward, 'reward_name'));
+        $uangSaku = $theMstReward[$keyUangSaku];
+
+//gaji dasar
+        $keyGaji = array_search('Gaji Dasar', array_column($theMstReward, 'reward_name'));
+        $gaji = $theMstReward[$keyGaji];
+
+//tbh
+        $keyTbh = array_search('Tunjangan Biaya Hidup', array_column($theMstReward, 'reward_name'));
+        $tbh = $theMstReward[$keyTbh];
+
+//rekomposisi
+        $keyRekomposisi = array_search('Tunjangan Rekomposisi', array_column($theMstReward, 'reward_name'));
+        $rekomposisi = $theMstReward[$keyRekomposisi];
+
+//jabatan
+        $keyJabatan = array_search('Tunjangan Jabatan', array_column($theMstReward, 'reward_name'));
+        $tunjab = $theMstReward[$keyJabatan];
+//============================MST REWARD END================================//
+
+//get value from setting model
         $indexTHR = floatval(Setting::getBaseSetting(Setting::INDEX_THR_1));
         $indexTHR2 = floatval(Setting::getBaseSetting(Setting::INDEX_THR_2));
         $indexTunjCuti = floatval(Setting::getBaseSetting(Setting::INDEX_TUNJANGAN_CUTI));
 
-        //value PMK Structure
-        $indexPMK5 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_5));
-        $indexPMK10 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_10));
-        $indexPMK15 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_15));
-        $indexPMK20 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_20));
-        $indexPMK25 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_25));
-        $indexPMK30 = floatval(Setting::getBaseSetting(Setting::INDEX_PMK_30));
-
-        $indexCutiBesar = floatval(Setting::getBaseSetting(Setting::INDEX_CUTI_BESAR));
-
         return $this->render('index', [
             'result' => $result,
             'model' => $model,
+            'uangSaku' => $uangSaku,
+            'gaji' => $gaji,
+            'tbh' => $tbh,
+            'rekomposisi' => $rekomposisi,
+            'tunjab' => $tunjab,
             'indexTHR' => $indexTHR,
             'indexTHR2' => $indexTHR2,
-            'indexTunjCuti' =>$indexTunjCuti,
-            'masaKerja' => $masaKerja,
-            'indexPMK5' => $indexPMK5,
-            'indexPMK10' => $indexPMK10,
-            'indexPMK15' => $indexPMK15,
-            'indexPMK20' => $indexPMK20,
-            'indexPMK25' => $indexPMK25,
-            'indexPMK30' => $indexPMK30,
-            'indexCutiBesar' => $indexCutiBesar,
-            'basedata' => $basedata,
-            'basedataFull' => $basedataFull,
+            'indexTunjCuti' =>$indexTunjCuti
+
         ]);
     }
 
@@ -227,14 +226,7 @@ class SiteController extends Controller
         }
     }
 
-    public function actionOptions()
-    {
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        $totalReward = Employee::instance()->getTotalReward();
-
-        return $this->asJson($totalReward);
-    }
+    /**Acc */
 
     /**
      * Logout action.

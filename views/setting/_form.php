@@ -1,7 +1,5 @@
 <?php
 
-use kartik\select2\Select2;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -27,16 +25,6 @@ use yii\widgets\ActiveForm;
 
                 <?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'group_nature')->widget(Select2::classname(), [
-                    'data' => ArrayHelper::map(\reward\models\MstNature::find()->where(['status' => 1])->all(), 'id', 'nature_name'),
-                    'language' => 'en',
-                    'options' => ['placeholder' => 'Select ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true
-                    ],
-                ]);
-                ?>
-
                 <?= $form->field($model, 'status')->dropDownList([1 => 'Active', 0 => 'Not Active',]) ?>
 
             </div>
@@ -48,6 +36,5 @@ use yii\widgets\ActiveForm;
      
             <?php ActiveForm::end(); ?>
         </div>
-
     </div>
 </div>

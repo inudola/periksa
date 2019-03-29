@@ -21,6 +21,15 @@ class RewardController extends Controller
     /**
      * {@inheritdoc}
      */
+    public static function allowedDomains()
+    {
+        return [
+            // '*',                        // star allows all domains
+            'http://test1.example.com',
+            'http://test2.example.com',
+        ];
+    }
+     
     public function behaviors()
     {
         return [
@@ -33,7 +42,7 @@ class RewardController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'roles' => ['reward_admin', 'reward_approval'],
+                        'roles' => ['reward_admin'],
                     ],
                 ],
             ],
@@ -50,7 +59,7 @@ class RewardController extends Controller
      * Lists all Reward models.
      * @return mixed
      */
-    public function actionIndex1()
+    public function actionIndex()
     {
         $searchModel = new RewardSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -174,32 +183,6 @@ class RewardController extends Controller
         return $this->render('update', [
             'model'     => $model,
             'rewardCriteria' => $rewardCriteria
-        ]);
-
-    }
-
-
-    public function actionApprove($id)
-    {
-        $model      = $this->findModel($id);
-
-        //$params = Yii::$app->request->get('mst_reward_id');
-        $rewardCriteria = RewardCriteria::instance()->findAll(['mst_reward_id' => $id]);
-
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->save()) {
-                //logging data
-                RewardLog::saveLog(Yii::$app->user->identity->username, "Approved Reward with ID ".$model->id);
-                Yii::$app->session->setFlash('success', "Your reward successfully approved.");
-            } else {
-                Yii::$app->session->setFlash('error', "Your reward was not approved.");
-            }
-
-            return $this->redirect(['/mst-reward/view', 'id' => $model->mst_reward_id]);
-        }
-
-        return $this->render('_approve', [
-            'model'     => $model,
         ]);
 
     }

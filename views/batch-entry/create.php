@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model projection\models\BatchEntry */
 
-$this->title = 'Add Element';
+$this->title = 'Create Batch Entry';
 $this->params['breadcrumbs'][] = ['label' => 'Batch Entries', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 

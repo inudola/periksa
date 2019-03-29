@@ -21,6 +21,7 @@ if ($employeeModel) {
 /* @var $model projection\models\SaldoNki */
 /* @var $form yii\widgets\ActiveForm */
 
+
 ?>
 
 <div class="saldo-nki-form">
@@ -62,7 +63,15 @@ if ($employeeModel) {
 
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'tahun')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'tahun')->widget(Select2::classname(), [
+                        'data' => Helpers::getTahun(),
+                        'language' => 'en',
+                        'options' => ['prompt' => ''],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                    ]);
+                    ?>
                 </div>
 
                 <div class="col-md-6">

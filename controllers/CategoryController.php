@@ -90,7 +90,7 @@ class CategoryController extends Controller
 
             if ($model->save()) {
                 //logging data
-                RewardLog::saveLog(Yii::$app->user->identity->username, "Create a new category with ID " . $model->id);
+                RewardLog::saveLog(Yii::$app->user->identity->username, "Create a new category with ID ".$model->id);
                 Yii::$app->session->setFlash('success', "Your category successfully created.");
             } else {
                 Yii::$app->session->setFlash('error', "Your category was not saved.");
@@ -122,19 +122,16 @@ class CategoryController extends Controller
 
             if (isset($_FILES['Category'])) {
                 $model->icon = UploadedFile::getInstance($model, 'icon');
-                if (isset($model->icon)) {
-                    $model->icon->saveAs(Yii::getAlias('@reward/web/img/category_reward/') . $model->icon->baseName . '.' . $model->icon->extension);
-                    $model->icon = 'img/category_reward/' . $model->icon->baseName . '.' . $model->icon->extension;
-                } else {
-                    $model->icon = $file;
-                }
-            } else {
+                $model->icon->saveAs(Yii::getAlias('@reward/web/img/category_reward/') . $model->icon->baseName . '.' . $model->icon->extension);
+                $model->icon = 'img/category_reward/' . $model->icon->baseName . '.' . $model->icon->extension;
+            }
+            else {
                 $model->icon = $file;
             }
 
             if ($model->save()) {
                 //logging data
-                RewardLog::saveLog(Yii::$app->user->identity->username, "Updated category with ID " . $model->id);
+                RewardLog::saveLog(Yii::$app->user->identity->username, "Updated category with ID ".$model->id);
                 Yii::$app->session->setFlash('success', "Your category successfully updated.");
             } else {
                 Yii::$app->session->setFlash('error', "Your category was not saved.");
@@ -162,7 +159,7 @@ class CategoryController extends Controller
 
         if ($this->findModel($id)->delete()) {
             //logging data
-            RewardLog::saveLog(Yii::$app->user->identity->username, "Delete Category with ID " . $id);
+            RewardLog::saveLog(Yii::$app->user->identity->username, "Delete Category with ID ".$id);
             Yii::$app->session->setFlash('success', "Your category successfully deleted.");
         } else {
             Yii::$app->session->setFlash('error', "Your category was not deleted.");

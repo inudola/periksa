@@ -105,7 +105,6 @@ FROM simulation_detail AS t2
                 '{{simulation_detail}}.*',
                 'SUM({{simulation_detail}}.amount) AS sumProj',
             ])
-            ->where(['NOT', ['n_group' => null]])
             ->groupBy(['bulan', 'tahun']);
 
         // add conditions that should always apply her  e
@@ -116,7 +115,7 @@ FROM simulation_detail AS t2
             ],
             'sort' => [
                 'defaultOrder' => [
-                    //'simulation_group' => SORT_ASC,
+                    //'id' => SORT_ASC,
                     'tahun' => SORT_ASC,
                     'bulan' => SORT_ASC,
                 ]
@@ -157,8 +156,7 @@ FROM simulation_detail AS t2
                 '{{simulation_detail}}.*', // select all fields
                 'SUM({{simulation_detail}}.amount) AS my_sum' // calculate orders count
             ])
-            ->where(['NOT', ['n_group' => null]])
-            ->groupBy('n_group');
+            ->groupBy('element');
 
         // add conditions that should always apply here
         $dataProvider1 = new ActiveDataProvider([
@@ -169,7 +167,7 @@ FROM simulation_detail AS t2
             'sort' => [
                 'defaultOrder' => [
                     'bulan' => SORT_ASC,
-                    'n_group' => SORT_ASC
+                    'element' => SORT_ASC
                 ]
             ],
         ]);

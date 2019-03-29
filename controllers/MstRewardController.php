@@ -179,9 +179,6 @@ class MstRewardController extends Controller
 
                     $model->file->saveAs(Yii::getAlias('@reward/web/file/') . $model->file->baseName . '.' . $model->file->extension);
                     $model->file = 'file/' . $model->file->baseName . '.' . $model->file->extension;
-                } else {
-                    $model->icon = $file;
-                    $model->file = $pdf;
                 }
             } else {
                 $model->icon = $file;
